@@ -1,0 +1,114 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>GLocal Mind</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/main.css" />
+    <iframe id="my_iframe" style="display:none;"></iframe>
+    <script>
+        function search() {
+            
+            var base_url = window.location.origin;
+            var name = document.getElementById("Name").value;
+            var uid = document.getElementById("Uid").value;
+            var from_date = document.getElementById("from-date").value;
+            var to_date = document.getElementById("to-date").value;
+            var empty_string = new String;
+            if (Date.parse(from_date) > Date.parse(to_date)){
+                alert("start date should not be greater than end date");
+                return
+            }
+            url = base_url + "/pubmed/search?name="+ name+"&universal_id="+uid;
+            if (from_date != empty_string){
+
+                if (to_date != empty_string){
+                    from_date = from_date.replace(/-/g,"/");
+                    to_date = to_date.replace(/-/g,"/");
+                    url = url + "&from_date=" + from_date + "&to_date=" + to_date
+                }
+                else{
+                    alert("end date not provided");
+                    return
+                }
+            }
+            console.log("url"+url);
+            var data = ""
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.open("GET", url, false);
+            xhttp.send(null);
+            raw_data = xhttp.responseText
+            data = JSON.parse(xhttp.responseText);
+            console.log("Data---->"+data+ "type:"+typeof(data));
+            // if(data){
+            //     if(data["count"] == 0){
+            //         msg = "No results found for name:"+name
+            //         if (from_date != empty_string){
+            //             if (to_date != empty_string){
+            //                 msg = msg + " start date:"+ from_date + " end date:"+to_date
+            //             }
+            //         }
+            //         alert(msg)
+            //         return
+            //     }
+            //     if (confirm(data["count"]+" records found, Do you want to Download xlsx?") == true) {
+            //         url = base_url + "/pubmed/download?data="
+            //         //url = base_url + "/pubmed/download"
+            //         url = url + raw_data
+            //         console.log(url)
+            //         document.getElementById('my_iframe').src = url;
+            //         // xhr.setRequestHeader("Content-Type", "application/json");
+            //         // xhr.open("POST", url, false);
+            //         // xhttp.send(JSON.stringify(data));
+            //         //$.post(url,JSON.stringify(data))
+            //         ms = 6000
+            //         var start = new Date().getTime();
+            //         var end = start;
+            //         while(end < start + ms) {
+            //             end = new Date().getTime();
+            //         }
+            //     }else{
+            //         return
+            //     }
+            // }
+
+        }
+
+    </script>
+</head>
+<body>    
+        <form id="search" class="form-style-9" action="/search"  method="post">
+            <ul>
+                <li>
+                    <input id="Name" type="text" name="Name"   class="field-style field-split align-left" placeholder="Name" autocomplete="on" required/>
+                    <input id="Uid" type="text" name="Uid"  class="field-style field-split align-right" placeholder="Uid" autocomplete="on" required/>
+                </li>
+                <li>
+                    <input id="from_date" type="date" name="from_date" class="field-style field-split align-left" placeholder="from_date" />
+                    <input id="to_date" type="date" name="to_date"  class="field-style field-split align-right" placeholder="to_date" />
+                </li>
+                
+                <li>
+                <input type="submit" value="Search" />
+                </li>
+            </ul>
+        </form>
+        <form id="upload" class="form-style-9" action="/upload" method="post" enctype="multipart/form-data">
+            <ul>
+                <li>
+                    <input id="from_date" type="date" name="from_date"  class="field-style field-split align-left" placeholder="from_date" />
+                    <input id="to_date" type="date" name="to_date"  class="field-style field-split align-right" placeholder="to_date" />
+                </li>
+                <li>
+                    <input id="file" type="file" name="upload" class="field-style field-split align-left" placeholder="upload" required/>
+                </li>
+                
+                <li>
+                    <input type="submit" value="Start upload" />
+                </li>
+            </ul>
+        </form>
+</body>
+</html>
