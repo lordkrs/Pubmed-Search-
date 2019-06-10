@@ -83,13 +83,23 @@
             <ul>
                 <li>
                     <input id="Name" type="text" name="Name"   class="field-style field-split align-left" placeholder="Name" autocomplete="on" required/>
-                    <input id="Uid" type="text" name="Uid"  class="field-style field-split align-right" placeholder="Uid" autocomplete="on" required/>
+                </li>
+
+                <li>
+                    <input id="FirstName" type="text" name="FirstName"   class="field-style field-split align-left" placeholder="FirstName" autocomplete="on"/>
+                    <input id="Initial" type="text" name="Initial"   class="field-style field-split align-right" placeholder="Initial" autocomplete="on"/>
+                </li>
+                <li>
+                    <input id="Lastname" type="text" name="Lastname"   class="field-style field-split align-left" placeholder="Lastname" autocomplete="on"/>
+                    <input id="Uid" type="text" name="Uid"  class="field-style field-split align-right" placeholder="Uid" autocomplete="on" required/>            
                 </li>
                 <li>
                     <input id="from_date" type="date" name="from_date" class="field-style field-split align-left" placeholder="from_date" />
                     <input id="to_date" type="date" name="to_date"  class="field-style field-split align-right" placeholder="to_date" />
                 </li>
-                
+                <li>
+                    <input id="records" type="text" name="records" value="420"  class="field-style field-split align-right" placeholder="records" autocomplete="on"/>            
+                </li>
                 <li>
                 <input type="submit" value="Search" />
                 </li>
@@ -110,5 +120,9 @@
                 </li>
             </ul>
         </form>
+        <!-- <from id="clear_tmp" class="form-style-9" action="/clear_tmp" method="post" >
+            <input id="records" type="text" name="records" value="420"  class="field-style field-split align-right" placeholder="records" autocomplete="on"/>            
+            <input type="submit" value="Clear Cache" />
+        </from> -->
 </body>
 </html>

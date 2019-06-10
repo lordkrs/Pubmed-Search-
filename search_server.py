@@ -12,7 +12,7 @@ temp_path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "tmp"
 if not os.path.exists(temp_path):
     os.makedirs(temp_path)
 
-PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={}[Author]"
+PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
 PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml"
 #Date_format:YYYY/MM/DD
@@ -20,7 +20,7 @@ headers = ["GM Universal Code", "Full Name", "Author Match","Title","URL", "Quer
 
 
 
-def create_xlsx(data):
+def create_xlsx(data=None, data_list=[], local=False):
     file_name = str(uuid.uuid4())+".xlsx"
     workbook = xlsxwriter.Workbook(temp_path + os.path.sep + file_name)
     worksheet = workbook.add_worksheet()
@@ -30,13 +30,23 @@ def create_xlsx(data):
         worksheet.write(row, col, header)
         col += 1
     
-    for col_data in data:
-        row += 1
-        col = 0
-        for header in headers:
-            #print("header--> {}:data-->{}:type--->{}".format(header,col_data[header],type(col_data[header])))
-            worksheet.write(row, col, col_data[header])
-            col += 1
+    if not local:
+        for col_data in data:
+            row += 1
+            col = 0
+            for header in headers:
+                #print("header--> {}:data-->{}:type--->{}".format(header,col_data[header],type(col_data[header])))
+                worksheet.write(row, col, col_data[header])
+                col += 1
+    else:
+        for data in data_list:
+            for col_data in data:
+                row += 1
+                col = 0
+                for header in headers:
+                    #print("header--> {}:data-->{}:type--->{}".format(header,col_data[header],type(col_data[header])))
+                    worksheet.write(row, col, col_data[header])
+                    col += 1
 
     workbook.close()        
     return file_name
@@ -109,11 +119,11 @@ def get_elocation_details(elocationid):
     return data
 
 def get_details(journal, elocationid):
-    data = "{}. {} {}".format(journal["ISOAbbreviation"],get_journal_issue_details(journal["JournalIssue"]),get_elocation_details(elocationid))
+    data = "{}. {} {}".format(journal.get("ISOAbbreviation",""),get_journal_issue_details(journal["JournalIssue"]),get_elocation_details(elocationid))
     return data
 
 def get_short_details(journal):
-    data = "{}. {}".format(journal["ISOAbbreviation"], journal["JournalIssue"]["PubDate"].get("Year",""))
+    data = "{}. {}".format(journal.get("ISOAbbreviation", ""), journal["JournalIssue"]["PubDate"].get("Year",""))
     return data
 
 def get_create_date(pub_dates):
@@ -182,21 +192,24 @@ def do_upload():
         os.remove(xlsx_file_path)
         ids_return_data = {"ids_info":{},"count":0}
 
-        for column_data in xlsx_data:
-            name = column_data["Name"] if column_data.get("Name") else None
-            uid = column_data["Uid"] if column_data.get("Uid") else None
+        xlsx_data_list = []
 
+        for column_data in xlsx_data:
+            name = column_data["Full_Name"] if column_data.get("Full_Name") else None
+            uid = column_data["KOL_ID"] if column_data.get("KOL_ID") else None
+            firstname = column_data["First_Name"] if column_data.get("First_Name") else None
+            initial = column_data["Middle_Name"] if column_data.get("Middle_Name") else None
+            lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
             if name is not None:
-                search_data = search_citations(name, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date)
+                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date)
                 if search_data["count"] != 0:
                     ids_return_data["ids_info"].update(search_data["ids_info"])
                     ids_return_data["count"] += len(search_data["ids_info"].keys())
-                    if ids_return_data["count"] >= 200:
-                        break
-        
-        if ids_return_data["count"] != 0:
-            file_path = download_csv(ids_return_data, local=True)
+                    xlsx_data_list.append(download_csv(search_data, local=True))
 
+        if ids_return_data["count"] != 0:
+            
+            file_path = create_xlsx(data_list=xlsx_data_list, local=True)
             return static_file(file_path, temp_path, download=file_path)
     except Exception as ex:
         print("Exception in upload:{}".format(ex))
@@ -204,25 +217,38 @@ def do_upload():
 
 
 @route("/search", method='POST')
-def search_citations(name=None, universal_id=None,from_date=None, to_date=None,  records_per_page="100", local_searh=False):
+def search_citations(name=None, initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="250", local_searh=False):
     try:
         if not local_searh:
             name = request.forms.get('Name')  if request.forms.get('Name') else None
-            records_per_page = request.forms.get('retmax') if request.forms.get('retmax') else "200"
+            records_per_page = request.forms.get('records') if request.forms.get('records') else "420"
             universal_id = request.forms.get('Uid') if request.forms.get('Uid') else str(uuid.uuid4())
             from_date = request.forms.get('from_date')  if request.forms.get('from_date') else None
             to_date = request.forms.get('to_date')  if request.forms.get('to_date') else None
+            initial = request.forms.get('Initial')  if request.forms.get('Initial') else None
+            lastname = request.forms.get('Lastname')  if request.forms.get('Lastname') else None
+            firstname = request.forms.get("FirstName") if request.forms.get('FirstName') else None
+        
         
         url = None
-        search_name = "" + name
-        if search_name:
-            if "," not in search_name:
-                if " " in search_name:
-                    search_name = search_name.replace(" ", "+")
-        
-            url = PUBMED_SEARCH_URL.format(search_name)
-        else:
+        if not name:
             raise Exception("Name is madatory field")
+
+        search_name = "" + name + "[Full Author Name]"
+        if search_name:
+        
+            if firstname and initial and lastname:
+                search_name += "+OR+{} {}{}[Author]".format(lastname, firstname[0], initial[0])
+                search_name += "+OR+{} {} {}[Author]".format(lastname, firstname, initial)
+                search_name += "+OR+{} {} {}[Author]".format(lastname, firstname, initial[0])
+                 
+
+            if lastname and firstname:
+                search_name += "+OR+{} {}[Author]".format(lastname, firstname)
+                search_name += "+OR+{} {}[Author]".format(firstname, lastname)
+                search_name += "+OR+{} {}[Author]".format(lastname, firstname[0])
+
+            url = PUBMED_SEARCH_URL.format(search_name)
 
         if from_date and to_date:
             if datetime.datetime.strptime(from_date, "%Y-%m-%d") > datetime.datetime.strptime(to_date, "%Y-%m-%d"):
@@ -255,9 +281,13 @@ def search_citations(name=None, universal_id=None,from_date=None, to_date=None, 
         return_data["count"] = len(return_data["ids_info"].keys())
 
         if return_data["count"] != 0:
-            
-            file_path = download_csv(return_data, local=True)
-            print(file_path)
+            if local_searh:
+                get_file_name = False
+            else:
+                get_file_name = True
+
+            file_path = download_csv(query_data=return_data, local=local_searh, get_file_name=True)
+            #print(file_path)
 
         if not local_searh:
             return static_file(file_path, temp_path, download=file_path)
@@ -270,12 +300,12 @@ def search_citations(name=None, universal_id=None,from_date=None, to_date=None, 
 
 
 @route("/pubmed/download")
-def download_csv(query_data=None, local=False):
-    try:
-        
+def download_csv(query_data=None, local=False,get_file_name=False):
+    try: 
         xlsx_data = []
         if not local:
-            query_data = json.loads(request.query.data) if request.query.data else None
+            if not get_file_name:
+                query_data = json.loads(request.query.data) if request.query.data else None
     
         if not query_data:
             raise Exception("query_data is madatory field")
@@ -306,8 +336,9 @@ def download_csv(query_data=None, local=False):
                 if article_data.get("ELocationID"):
                     form_data["Details"] = get_details(article_data["Journal"], article_data["ELocationID"])
                 else:
-                    form_data["Details"] = "{}. {}".format(article_data["Journal"]["ISOAbbreviation"],get_journal_issue_details(article_data["Journal"]["JournalIssue"]))
-                
+                    
+                    form_data["Details"] = "{}. {}".format(article_data["Journal"].get("ISOAbbreviation",""),get_journal_issue_details(article_data["Journal"]["JournalIssue"]))
+
                 form_data["GM Universal Code"] = query_data["ids_info"][medline_data["PMID"]["#text"]]["univeral_id"]
                 form_data["Affiliation"] = get_affiliation_details(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
                 form_data["Query Used"] = query_data["ids_info"][medline_data["PMID"]["#text"]]["query"]
@@ -322,19 +353,28 @@ def download_csv(query_data=None, local=False):
                 form_data["Properties"] = get_properties(publication_date["History"]["PubMedPubDate"], article_data["AuthorList"]["Author"])
                 xlsx_data.append(form_data)
         else:
-            raise Exception("Error occured while comunicating with pubmed, status_code({})".format(r.status_code))
+            raise Exception("Error occured while comunicating with pubmed, status_code({}),text({})".format(r.status_code,r.text))
 
         if not xlsx_data:
             raise Exception("Error occured while comunicating with pubmed")
-        
-        file_name = create_xlsx(xlsx_data)
-        if local:
+        if get_file_name:
+            file_name = create_xlsx(data=xlsx_data, local=False)
             return file_name
+        if local:
+            return xlsx_data
+
+        file_name = create_xlsx(data=xlsx_data, local=False)
         return static_file(file_name, temp_path, download=file_name)
     except Exception as ex:
         print("download_csv:Exception occurred: {}".format(ex))
         abort(500, "Exception occurred: {}".format(ex))
 
+
+@route("/clear_tmp",method="POST")
+def clear_tmp():
+    files = os.listdir(temp_path)
+    for file_ in files:
+        os.remove(file_)    
 
 @route("/css/<css_file>")
 def serve_css(css_file):
