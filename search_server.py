@@ -197,7 +197,7 @@ def do_upload():
         if ids_return_data["count"] != 0:
             file_path = download_csv(ids_return_data, local=True)
 
-        return static_file(file_path, temp_path, download=file_path)
+            return static_file(file_path, temp_path, download=file_path)
     except Exception as ex:
         print("Exception in upload:{}".format(ex))
         abort(500, "Exception occurred: {}".format(ex))        
