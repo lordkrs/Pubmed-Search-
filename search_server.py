@@ -1,5 +1,5 @@
 import requests
-import time
+import datetime
 import xmltodict
 import os
 import json
@@ -163,26 +163,31 @@ def do_upload():
     from_date = request.forms.get('from_date') if request.forms.get('from_date') else None
     to_date = request.forms.get('to_date') if request.forms.get('to_date') else None
 
+
+    if from_date and to_date:
+        if datetime.datetime.strptime(from_date, "%Y-%m-%d") > datetime.datetime.strptime(to_date, "%Y-%m-%d"):
+            return '<html><script>alert("from date should be lesser than to date");</script><html>'
+
     try:
         xlsx_file_path = os.path.join(temp_path, upload.filename)
         xlsx_data = []
         wb_obj = openpyxl.load_workbook(xlsx_file_path)
         sheet_obj = wb_obj.active
-        print(sheet_obj.max_column)
-        for i in range(1, sheet_obj.max_column+1):
+        for i in range(1, sheet_obj.max_row+1):
             row_data = {}
-            for j in range(1, sheet_obj.max_row+1):
+            for j in range(1, sheet_obj.max_column+1):
                 row_data[sheet_obj.cell(row = 1, column = j).value] = sheet_obj.cell(row = i+1, column = j).value
             xlsx_data.append(row_data)
         
         os.remove(xlsx_file_path)
         ids_return_data = {"ids_info":{},"count":0}
+
         for column_data in xlsx_data:
             name = column_data["Name"] if column_data.get("Name") else None
             uid = column_data["Uid"] if column_data.get("Uid") else None
 
             if name is not None:
-                search_data = search_citations(name, universal_id=uid, local_searh=True)
+                search_data = search_citations(name, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date)
                 if search_data["count"] != 0:
                     ids_return_data["ids_info"].update(search_data["ids_info"])
                     ids_return_data["count"] += len(search_data["ids_info"].keys())
@@ -199,7 +204,7 @@ def do_upload():
 
 
 @route("/search", method='POST')
-def search_citations(name=None, universal_id=None,from_date=None, to_date=None,  records_per_page="20", local_searh=False):
+def search_citations(name=None, universal_id=None,from_date=None, to_date=None,  records_per_page="100", local_searh=False):
     try:
         if not local_searh:
             name = request.forms.get('Name')  if request.forms.get('Name') else None
@@ -220,6 +225,9 @@ def search_citations(name=None, universal_id=None,from_date=None, to_date=None, 
             raise Exception("Name is madatory field")
 
         if from_date and to_date:
+            if datetime.datetime.strptime(from_date, "%Y-%m-%d") > datetime.datetime.strptime(to_date, "%Y-%m-%d"):
+                return '<html><script>alert("from date should be lesser than to date");</script><html>'
+
             url = url + PUBMED_DATE_QUERY.format(from_date,to_date)
         
         query_url = url.split("&term=")[-1]
