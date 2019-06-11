@@ -75,7 +75,7 @@ def get_description(auther_list):
         if author.get("CollectiveName",None):
             desc += author["CollectiveName"]
         else:
-            desc += author["LastName"] + " " + author.get("Initials","")
+            desc += author.get("LastName","") + " " + author.get("Initials","")
         if len(auther_list) == i:
             desc += "."
         else:
@@ -139,7 +139,7 @@ def get_first_author(auther_list):
     data = ""
     for author in auther_list:
         try:
-            data = author["LastName"] + " " + author.get("Initials","")
+            data = author.get("LastName","") + " " + author.get("Initials","")
             return data
         except KeyError:
             if author.get("CollectiveName",None):
