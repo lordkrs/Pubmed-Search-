@@ -152,7 +152,7 @@ def get_full_name(name, auther_list):
     name_list = name.replace(",","").lower().split(" ")
     for author in auther_list:
         if author.get("LastName", "").lower() in name_list or author.get("ForeName", "").lower() in name_list:
-            return author["LastName"] + ", " + author.get("ForeName","")
+            return author.get("LastName", "") + ", " + author.get("ForeName","")
     return name
 
 def get_properties(pub_dates,auther_list):
