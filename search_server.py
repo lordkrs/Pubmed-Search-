@@ -12,9 +12,10 @@ temp_path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "tmp"
 if not os.path.exists(temp_path):
     os.makedirs(temp_path)
 
-PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={}"
+MY_API_KEY = "6f63b0b5ec41afd50bed862a0d61ff0ae709"
+PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
-PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml"
+PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
 #Date_format:YYYY/MM/DD
 headers = ["GM Universal Code", "Full Name", "Author Match","Title","URL", "Query Used","Description","Details","ShortDetails", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties"]
 
