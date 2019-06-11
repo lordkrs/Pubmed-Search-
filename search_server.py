@@ -7,6 +7,9 @@ import uuid
 import xlsxwriter
 import openpyxl
 from bottle import abort, request, static_file, run, route
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 temp_path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "tmp"
 if not os.path.exists(temp_path):
