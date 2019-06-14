@@ -1,0 +1,287 @@
+{
+	"PubmedArticleSet": {
+		"PubmedArticle": {
+			"MedlineCitation": {
+				"PMID": {
+					"_Version": "1",
+					"__text": "29663944"
+				},
+				"DateRevised": {
+					"Year": "2019",
+					"Month": "04",
+					"Day": "10"
+				},
+				"Article": {
+					"Journal": {
+						"ISSN": {
+							"_IssnType": "Print",
+							"__text": "1532-0820"
+						},
+						"JournalIssue": {
+							"Volume": "68",
+							"Issue": "2",
+							"PubDate": {
+								"Year": "2018",
+								"Month": "04",
+								"Day": "02"
+							},
+							"_CitedMedium": "Internet"
+						},
+						"Title": "Comparative medicine",
+						"ISOAbbreviation": "Comp. Med."
+					},
+					"ArticleTitle": {
+						"i": "Macaca mulatta",
+						"__text": "Repair of a Large Ventral Hernia in a Rhesus Macaque (\n                    \n) by Using an Abdominal Component Separation Technique."
+					},
+					"Pagination": {
+						"MedlinePgn": "177-181"
+					},
+					"Abstract": {
+						"AbstractText": "Here we present a 32-y-old rhesus macaque (Macaca mulatta) with a large recurrent ventral incisional hernia. The initial surgery included midline celiotomy for treatment of endometriosis, in which the animal developed a hernia that was repaired with interposition of mesh. Hernia recurrence at 1 y resulted in a defect measuring 7 × 13 cm, with loss of abdominal domain. Skin breakdown was noted with areas of exposed mesh through the skin with associated acute on chronic infection. Clinically, the animal was lethargic, not eating, and failing to thrive. The present surgical treatment included midline celiotomy, removal of mesh, and attempted primary fascial closure. Due to the large defect and high tension, the fascia could not be closed. To facilitate closure, abdominal component separation technique was used and consisted of skin and subcutaneous dissection, external oblique muscle release, and dissection between the external and internal oblique musculature. This technique allowed for primary fascial closure and resection of excess diseased skin. A piece of polypropylene mesh was placed in a sublay fashion to reinforce the primary fascial closure. The animal tolerated the procedure well and has demonstrated steady weight gain, with no recurrence at 12 mo. Large ventral abdominal hernia defects in after surgery or trauma in NHP can present reconstructive challenges to veterinary surgeons. Failure to achieve a dynamic, low-tension closure can result in hernia recurrence, necessitating additional operations. Abdominal component separation is not commonly used in veterinary surgery and may be a helpful tool in cases of difficult abdominal reconstructions."
+					},
+					"AuthorList": {
+						"Author": [
+							{
+								"LastName": "Kempton",
+								"ForeName": "Steve J",
+								"Initials": "SJ",
+								"AffiliationInfo": {
+									"Affiliation": "Division of Plastic and Reconstructive Surgery, University of Wisconsin, Madison, Wisconsin, USA., Email: steve.kempton104@gmail.com."
+								},
+								"_ValidYN": "Y"
+							},
+							{
+								"LastName": "Israel",
+								"ForeName": "Jacqueline S",
+								"Initials": "JS",
+								"AffiliationInfo": {
+									"Affiliation": "Division of Plastic and Reconstructive Surgery, University of Wisconsin, Madison, Wisconsin, USA."
+								},
+								"_ValidYN": "Y"
+							},
+							{
+								"LastName": "Capuano",
+								"ForeName": "Saverio",
+								"Initials": "S",
+								"Suffix": "III",
+								"AffiliationInfo": {
+									"Affiliation": "Wisconsin National Primate Research Center, Madison, Wisconsin, USA."
+								},
+								"_ValidYN": "Y"
+							},
+							{
+								"LastName": "Poore",
+								"ForeName": "Samuel O",
+								"Initials": "SO",
+								"AffiliationInfo": {
+									"Affiliation": "Division of Plastic and Reconstructive Surgery, University of Wisconsin, Madison, Wisconsin, USA."
+								},
+								"_ValidYN": "Y"
+							}
+						],
+						"_CompleteYN": "Y"
+					},
+					"Language": "eng",
+					"GrantList": {
+						"Grant": {
+							"GrantID": "P51 OD011106",
+							"Acronym": "OD",
+							"Agency": "NIH HHS",
+							"Country": "United States"
+						},
+						"_CompleteYN": "Y"
+					},
+					"PublicationTypeList": {
+						"PublicationType": {
+							"_UI": "D016428",
+							"__text": "Journal Article"
+						}
+					},
+					"_PubModel": "Print"
+				},
+				"MedlineJournalInfo": {
+					"Country": "United States",
+					"MedlineTA": "Comp Med",
+					"NlmUniqueID": "100900466",
+					"ISSNLinking": "1532-0820"
+				},
+				"_Status": "In-Process",
+				"_Owner": "NLM"
+			},
+			"PubmedData": {
+				"History": {
+					"PubMedPubDate": [
+						{
+							"Year": "2018",
+							"Month": "4",
+							"Day": "18",
+							"Hour": "6",
+							"Minute": "0",
+							"_PubStatus": "entrez"
+						},
+						{
+							"Year": "2018",
+							"Month": "4",
+							"Day": "18",
+							"Hour": "6",
+							"Minute": "0",
+							"_PubStatus": "pubmed"
+						},
+						{
+							"Year": "2018",
+							"Month": "4",
+							"Day": "18",
+							"Hour": "6",
+							"Minute": "0",
+							"_PubStatus": "medline"
+						}
+					]
+				},
+				"PublicationStatus": "ppublish",
+				"ArticleIdList": {
+					"ArticleId": [
+						{
+							"_IdType": "pubmed",
+							"__text": "29663944"
+						},
+						{
+							"_IdType": "pmc",
+							"__text": "PMC5897975"
+						}
+					]
+				},
+				"ReferenceList": {
+					"Reference": [
+						{
+							"Citation": "Plast Reconstr Surg. 1990 Sep;86(3):519-26",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "2143588"
+								}
+							}
+						},
+						{
+							"Citation": "Plast Reconstr Surg. 2007 Sep;120(3):669-80",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "17700118"
+								}
+							}
+						},
+						{
+							"Citation": "Plast Reconstr Surg. 2012 Nov;130(5 Suppl 2):216S-24S",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "23096976"
+								}
+							}
+						},
+						{
+							"Citation": "Surgery. 2014 Oct;156(4):894-9",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "25239341"
+								}
+							}
+						},
+						{
+							"Citation": "Hernia. 2001 Sep;5(3):164-7",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "11759806"
+								}
+							}
+						},
+						{
+							"Citation": "Surg Clin North Am. 1991 Feb;71(1):1-11",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "1824882"
+								}
+							}
+						},
+						{
+							"Citation": "Plast Reconstr Surg. 2000 Feb;105(2):731-8; quiz 739",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "10697187"
+								}
+							}
+						},
+						{
+							"Citation": "Plast Reconstr Surg. 2013 Nov;132(5):1295-304",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "24165612"
+								}
+							}
+						},
+						{
+							"Citation": "Ann R Coll Surg Engl. 2010 May;92(4):272-8",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "20501011"
+								}
+							}
+						},
+						{
+							"Citation": "Plast Reconstr Surg. 1996 Sep;98(3):464-9",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "8700983"
+								}
+							}
+						},
+						{
+							"Citation": "Aesthetic Plast Surg. 2010 Jun;34(3):290-6",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "19967358"
+								}
+							}
+						},
+						{
+							"Citation": "Am J Surg. 2012 Nov;204(5):709-16",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "22607741"
+								}
+							}
+						},
+						{
+							"Citation": "J Am Coll Surg. 2017 May;224(5):954-961",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "28153601"
+								}
+							}
+						},
+						{
+							"Citation": "Ann Surg. 2003 Sep;238(3):349-55; discussion 355-7",
+							"ArticleIdList": {
+								"ArticleId": {
+									"_IdType": "pubmed",
+									"__text": "14501501"
+								}
+							}
+						}
+					]
+				}
+			}
+		}
+	}
+}

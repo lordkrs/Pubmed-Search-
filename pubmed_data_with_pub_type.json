@@ -1,0 +1,230 @@
+{
+	"PubmedArticleSet": {
+		"PubmedArticle": {
+			"MedlineCitation": {
+				"PMID": {
+					"_Version": "1",
+					"__text": "27259075"
+				},
+				"DateCompleted": {
+					"Year": "2018",
+					"Month": "03",
+					"Day": "16"
+				},
+				"DateRevised": {
+					"Year": "2018",
+					"Month": "12",
+					"Day": "02"
+				},
+				"Article": {
+					"Journal": {
+						"ISSN": {
+							"_IssnType": "Electronic",
+							"__text": "2168-6173"
+						},
+						"JournalIssue": {
+							"Volume": "134",
+							"Issue": "7",
+							"PubDate": {
+								"Year": "2016",
+								"Month": "07",
+								"Day": "01"
+							},
+							"_CitedMedium": "Internet"
+						},
+						"Title": "JAMA ophthalmology",
+						"ISOAbbreviation": "JAMA Ophthalmol"
+					},
+					"ArticleTitle": "Origin of Multiple Formula Use to Calculate Intraocular Lens Power-Reply.",
+					"Pagination": {
+						"MedlinePgn": "848-9"
+					},
+					"ELocationID": {
+						"_EIdType": "doi",
+						"_ValidYN": "Y",
+						"__text": "10.1001/jamaophthalmol.2016.1049"
+					},
+					"AuthorList": {
+						"Author": [
+							{
+								"LastName": "Ladas",
+								"ForeName": "John G",
+								"Initials": "JG",
+								"AffiliationInfo": {
+									"Affiliation": "Wilmer Eye Institute, Baltimore, Maryland."
+								},
+								"_ValidYN": "Y"
+							},
+							{
+								"LastName": "Jun",
+								"ForeName": "Albert S",
+								"Initials": "AS",
+								"AffiliationInfo": {
+									"Affiliation": "Wilmer Eye Institute, Baltimore, Maryland."
+								},
+								"_ValidYN": "Y"
+							},
+							{
+								"LastName": "Devgan",
+								"ForeName": "Uday",
+								"Initials": "U",
+								"AffiliationInfo": {
+									"Affiliation": "Jules Stein Eye Institute, University of California, Los Angeles."
+								},
+								"_ValidYN": "Y"
+							}
+						],
+						"_CompleteYN": "Y"
+					},
+					"Language": "eng",
+					"PublicationTypeList": {
+						"PublicationType": [
+							{
+								"_UI": "D016422",
+								"__text": "Letter"
+							},
+							{
+								"_UI": "D016420",
+								"__text": "Comment"
+							}
+						]
+					},
+					"_PubModel": "Print"
+				},
+				"MedlineJournalInfo": {
+					"Country": "United States",
+					"MedlineTA": "JAMA Ophthalmol",
+					"NlmUniqueID": "101589539",
+					"ISSNLinking": "2168-6165"
+				},
+				"CitationSubset": [
+					"AIM",
+					"IM"
+				],
+				"CommentsCorrectionsList": {
+					"CommentsCorrections": [
+						{
+							"RefSource": "JAMA Ophthalmol. 2015 Dec;133(12):1431-6",
+							"PMID": {
+								"_Version": "1",
+								"__text": "26469147"
+							},
+							"_RefType": "CommentOn"
+						},
+						{
+							"RefSource": "JAMA Ophthalmol. 2016 Jul 1;134(7):847-8",
+							"PMID": {
+								"_Version": "1",
+								"__text": "27258599"
+							},
+							"_RefType": "CommentOn"
+						}
+					]
+				},
+				"MeshHeadingList": {
+					"MeshHeading": [
+						{
+							"DescriptorName": {
+								"_UI": "D001699",
+								"_MajorTopicYN": "N",
+								"__text": "Biometry"
+							}
+						},
+						{
+							"DescriptorName": {
+								"_UI": "D003315",
+								"_MajorTopicYN": "N",
+								"__text": "Cornea"
+							}
+						},
+						{
+							"DescriptorName": {
+								"_UI": "D006801",
+								"_MajorTopicYN": "N",
+								"__text": "Humans"
+							}
+						},
+						{
+							"DescriptorName": {
+								"_UI": "D019654",
+								"_MajorTopicYN": "N",
+								"__text": "Lens Implantation, Intraocular"
+							}
+						},
+						{
+							"DescriptorName": {
+								"_UI": "D007910",
+								"_MajorTopicYN": "Y",
+								"__text": "Lenses, Intraocular"
+							}
+						},
+						{
+							"DescriptorName": {
+								"_UI": "D055095",
+								"_MajorTopicYN": "N",
+								"__text": "Optics and Photonics"
+							}
+						},
+						{
+							"DescriptorName": {
+								"_UI": "D012029",
+								"_MajorTopicYN": "Y",
+								"__text": "Refraction, Ocular"
+							}
+						}
+					]
+				},
+				"_Status": "MEDLINE",
+				"_IndexingMethod": "Automated",
+				"_Owner": "NLM"
+			},
+			"PubmedData": {
+				"History": {
+					"PubMedPubDate": [
+						{
+							"Year": "2016",
+							"Month": "6",
+							"Day": "4",
+							"Hour": "6",
+							"Minute": "0",
+							"_PubStatus": "entrez"
+						},
+						{
+							"Year": "2016",
+							"Month": "6",
+							"Day": "4",
+							"Hour": "6",
+							"Minute": "0",
+							"_PubStatus": "pubmed"
+						},
+						{
+							"Year": "2018",
+							"Month": "3",
+							"Day": "17",
+							"Hour": "6",
+							"Minute": "0",
+							"_PubStatus": "medline"
+						}
+					]
+				},
+				"PublicationStatus": "ppublish",
+				"ArticleIdList": {
+					"ArticleId": [
+						{
+							"_IdType": "pubmed",
+							"__text": "27259075"
+						},
+						{
+							"_IdType": "pii",
+							"__text": "2522187"
+						},
+						{
+							"_IdType": "doi",
+							"__text": "10.1001/jamaophthalmol.2016.1049"
+						}
+					]
+				}
+			}
+		}
+	}
+}

@@ -5,6 +5,7 @@ import os
 import json
 import uuid
 import xlsxwriter
+from multiprocessing import process
 import openpyxl
 from bottle import abort, request, static_file, run, route
 import sys
@@ -20,7 +21,8 @@ PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
 PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
 #Date_format:YYYY/MM/DD
-headers = ["GM Universal Code", "Full Name", "Author Match","Title","URL", "Query Used","Description","Details","ShortDetails", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties"]
+headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Title","URL", "Query Used",
+          "Description","Details","ShortDetails", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text"]
 
 
 
@@ -158,6 +160,40 @@ def get_full_name(name, auther_list):
         if author.get("LastName", "").lower() in name_list or author.get("ForeName", "").lower() in name_list:
             return author.get("LastName", "") + ", " + author.get("ForeName","")
     return name
+
+def get_author_position(name, auther_list):
+    if type(auther_list) == dict:
+        auther_list = [auther_list]
+    name_list = name.replace(",","").lower().split(" ")
+    for author in auther_list:
+        if author.get("LastName", ""):
+            if author.get("LastName", "").lower() in name_list:
+                if author.get("ForeName", ""):
+                    forename = author.get("ForeName", "").split(" ")[0]
+                    if forename.lower() in name_list:
+                        return auther_list.index(author)
+                else:
+                    return auther_list.index(author)
+    return 0
+
+
+def get_publication_type(publication_type_list):
+    data = []
+    if type(publication_type_list) == dict:
+        publication_type_list = [publication_type_list]
+    for type_ in publication_type_list:
+        data.append(type_["#text"])
+    return ";".join(data)
+
+def get_mesh_headings(mesh_heading_list):
+    data = []
+    if type(mesh_heading_list) == dict:
+        mesh_heading_list = [mesh_heading_list]
+    for heading in mesh_heading_list:
+        if heading.get("DescriptorName",""):
+            data.append(heading["DescriptorName"].get("#text",""))
+    return ";".join(data)
+
 
 def get_properties(pub_dates,auther_list):
     data = "create date:{} | first author:{}".format(get_create_date(pub_dates), get_first_author(auther_list))
@@ -305,7 +341,7 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
 
 @route("/pubmed/download")
 def download_csv(query_data=None, local=False,get_file_name=False):
-    try: 
+    try:
         xlsx_data = []
         if not local:
             if not get_file_name:
@@ -330,6 +366,7 @@ def download_csv(query_data=None, local=False,get_file_name=False):
                 medline_data = data["MedlineCitation"]
                 article_data = medline_data["Article"]
                 publication_date = data["PubmedData"]
+                mesh_heading_data = medline_data.get("MeshHeadingList",{})
                 form_data = {}
                 if type(article_data["ArticleTitle"]) == dict:
                     form_data["Title"] = article_data["ArticleTitle"]["#text"]
@@ -349,9 +386,29 @@ def download_csv(query_data=None, local=False,get_file_name=False):
                 form_data["ShortDetails"] = get_short_details(article_data["Journal"])
                 form_data["Resource"] = "PubMed"
                 form_data["Type"] = "citation"
-                form_data["Full Name"] = get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
+                form_data["Full Name"] =   query_data["ids_info"][medline_data["PMID"]["#text"]]["name"]    #get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
                 form_data["Identifiers"] = "PMID:" + medline_data["PMID"]["#text"]
                 form_data["Db"] = "pubmed"
+                if article_data.get("PublicationTypeList"):
+                    form_data["Publication_Type"] = get_publication_type(article_data["PublicationTypeList"].get("PublicationType",[]))
+                else:
+                    form_data["Publication_Type"] = ""
+                
+                if mesh_heading_data.get("MeshHeading"):
+                    form_data["Mesh_Headings"] = get_mesh_headings(mesh_heading_data.get("MeshHeading",[]))
+                else:
+                    form_data["Mesh_Headings"] = ""
+                
+                form_data["Authorship_Position"] = get_author_position(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
+                form_data["Author_Count"] = len(article_data["AuthorList"]["Author"])
+                form_data["Abstract_Text"] = ""
+                if article_data.get("Abstract",None):
+                    if article_data["Abstract"].get("AbstractText",""):
+                        if type(article_data["Abstract"]["AbstractText"]) == list:
+                            article_data["Abstract"]["AbstractText"][0]["#text"]
+                        else: 
+                            form_data["Abstract_Text"] = article_data["Abstract"]["AbstractText"] 
+
                 form_data["EntrezUID"] = medline_data["PMID"]["#text"]
                 form_data["Author Match"] = get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
                 form_data["Properties"] = get_properties(publication_date["History"]["PubMedPubDate"], article_data["AuthorList"]["Author"])
