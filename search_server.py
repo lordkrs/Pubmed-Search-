@@ -81,6 +81,11 @@ def get_description(auther_list):
         if author.get("CollectiveName",None):
             desc += author["CollectiveName"]
         else:
+            if author.get("LastName", "") is None:
+                author["LastName"] = ""
+            if author.get("ForeName", "") is None:
+                author["ForeName"] = ""
+
             desc += author.get("LastName","") + " " + author.get("Initials","")
         if len(auther_list) == i:
             desc += "."
@@ -98,6 +103,10 @@ def get_affiliation_details(auther_name, auther_list):
                 author["AffiliationInfo"] = [author["AffiliationInfo"]]
                 data = ""
                 i = 0
+                if author.get("LastName", "") is None:
+                    author["LastName"] = ""
+                if author.get("ForeName", "") is None:
+                    author["ForeName"] = ""
                 if author.get("LastName", "").lower() in name_list or author.get("ForeName", "").lower() in name_list:
                     for aff_info in author["AffiliationInfo"]:
                         data += aff_info["Affiliation"]
@@ -145,6 +154,10 @@ def get_first_author(auther_list):
     data = ""
     for author in auther_list:
         try:
+            if author.get("LastName", "") is None:
+                author["LastName"] = ""
+            if author.get("ForeName", "") is None:
+                author["ForeName"] = ""
             data = author.get("LastName","") + " " + author.get("Initials","")
             return data
         except KeyError:
@@ -157,6 +170,10 @@ def get_full_name(name, auther_list):
         auther_list = [auther_list]
     name_list = name.replace(",","").lower().split(" ")
     for author in auther_list:
+        if author.get("LastName", "") is None:
+            author["LastName"] = ""
+        if author.get("ForeName", "") is None:
+            author["ForeName"] = ""
         if author.get("LastName", "").lower() in name_list or author.get("ForeName", "").lower() in name_list:
             return author.get("LastName", "") + ", " + author.get("ForeName","")
     return name
@@ -166,14 +183,18 @@ def get_author_position(name, auther_list):
         auther_list = [auther_list]
     name_list = name.replace(",","").lower().split(" ")
     for author in auther_list:
+        if author.get("LastName", "") is None:
+            author["LastName"] = ""
+        if author.get("ForeName", "") is None:
+            author["ForeName"] = ""
         if author.get("LastName", ""):
             if author.get("LastName", "").lower() in name_list:
                 if author.get("ForeName", ""):
                     forename = author.get("ForeName", "").split(" ")[0]
                     if forename.lower() in name_list:
-                        return auther_list.index(author)
+                        return auther_list.index(author) + 1
                 else:
-                    return auther_list.index(author)
+                    return auther_list.index(author) + 1
     return 0
 
 
@@ -235,15 +256,17 @@ def do_upload():
         xlsx_data_list = []
 
         for column_data in xlsx_data:
+            print("\n\n{} of {}\n\n".format(xlsx_data.index(column_data)+1, len(xlsx_data)))
             name = column_data["Full_Name"] if column_data.get("Full_Name") else None
             uid = column_data["KOL_ID"] if column_data.get("KOL_ID") else None
             firstname = column_data["First_Name"] if column_data.get("First_Name") else None
             initial = column_data["Middle_Name"] if column_data.get("Middle_Name") else None
             lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
             if name is not None:
-                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date)
+                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=400)
                 if search_data["count"] != 0:
-                    ids_return_data["ids_info"].update(search_data["ids_info"])
+                    
+                    ids_return_data["ids_info"].update(search_data["ids_info"])                
                     ids_return_data["count"] += len(search_data["ids_info"].keys())
                     xlsx_data_list.append(download_csv(search_data, local=True))
 
@@ -257,7 +280,7 @@ def do_upload():
 
 
 @route("/search", method='POST')
-def search_citations(name=None, initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="250", local_searh=False):
+def search_citations(name=None, initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="400", local_searh=False):
     try:
         if not local_searh:
             name = request.forms.get('Name')  if request.forms.get('Name') else None
@@ -321,18 +344,12 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
         return_data["count"] = len(return_data["ids_info"].keys())
 
         if return_data["count"] != 0:
-            if local_searh:
-                get_file_name = False
+
+            if not local_searh:
+                file_path = download_csv(query_data=return_data, local=local_searh)
+                return static_file(file_path, temp_path, download=file_path)
             else:
-                get_file_name = True
-
-            file_path = download_csv(query_data=return_data, local=local_searh, get_file_name=True)
-            #print(file_path)
-
-        if not local_searh:
-            return static_file(file_path, temp_path, download=file_path)
-        else:
-            return return_data
+                return return_data
 
     except Exception as ex:
         print("search_citations:Exception occurred: {}".format(ex))
@@ -340,12 +357,11 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
 
 
 @route("/pubmed/download")
-def download_csv(query_data=None, local=False,get_file_name=False):
+def download_csv(query_data=None, local=False):
     try:
         xlsx_data = []
-        if not local:
-            if not get_file_name:
-                query_data = json.loads(request.query.data) if request.query.data else None
+        # if not local:
+        #     query_data = json.loads(request.query.data) if request.query.data else None
     
         if not query_data:
             raise Exception("query_data is madatory field")
@@ -405,9 +421,18 @@ def download_csv(query_data=None, local=False,get_file_name=False):
                 if article_data.get("Abstract",None):
                     if article_data["Abstract"].get("AbstractText",""):
                         if type(article_data["Abstract"]["AbstractText"]) == list:
-                            article_data["Abstract"]["AbstractText"][0]["#text"]
-                        else: 
-                            form_data["Abstract_Text"] = article_data["Abstract"]["AbstractText"] 
+                            for text in article_data["Abstract"]["AbstractText"]:
+                                if text:
+                                    if type(text) == dict:
+                                        form_data["Abstract_Text"] += text.get("#text","")
+                                    else:
+                                        form_data["Abstract_Text"] += text   
+                                form_data["Abstract_Text"] += ";"
+
+                        elif type(article_data["Abstract"]["AbstractText"]) == dict:
+                            form_data["Abstract_Text"] = article_data["Abstract"]["AbstractText"].get("#text")
+                        else:
+                            form_data["Abstract_Text"] = article_data["Abstract"]["AbstractText"]
 
                 form_data["EntrezUID"] = medline_data["PMID"]["#text"]
                 form_data["Author Match"] = get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
@@ -418,14 +443,13 @@ def download_csv(query_data=None, local=False,get_file_name=False):
 
         if not xlsx_data:
             raise Exception("Error occured while comunicating with pubmed")
-        if get_file_name:
-            file_name = create_xlsx(data=xlsx_data, local=False)
-            return file_name
+        
         if local:
             return xlsx_data
 
         file_name = create_xlsx(data=xlsx_data, local=False)
-        return static_file(file_name, temp_path, download=file_name)
+
+        return file_name
     except Exception as ex:
         print("download_csv:Exception occurred: {}".format(ex))
         abort(500, "Exception occurred: {}".format(ex))
