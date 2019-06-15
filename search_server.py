@@ -19,7 +19,8 @@ if not os.path.exists(temp_path):
 MY_API_KEY = "6f63b0b5ec41afd50bed862a0d61ff0ae709"
 PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
-PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
+#PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
+PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
 #Date_format:YYYY/MM/DD
 headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Title","URL", "Query Used",
           "Description","Details","ShortDetails", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text"]
@@ -268,7 +269,7 @@ def do_upload():
             initial = column_data["Middle_Name"] if column_data.get("Middle_Name") else None
             lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
             if name is not None:
-                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=400)
+                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=20000)
                 if search_data["count"] != 0:
                     
                     ids_return_data["ids_info"].update(search_data["ids_info"])                
@@ -306,15 +307,15 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
         if search_name:
         
             if firstname and initial and lastname:
-                search_name += "+OR+{} {}{}[Author]".format(lastname, firstname[0], initial[0])
-                search_name += "+OR+{} {} {}[Author]".format(lastname, firstname, initial)
-                search_name += "+OR+{} {} {}[Author]".format(lastname, firstname, initial[0])
+                search_name += "+OR+{} {}{}[Full Author Name]".format(lastname, firstname[0], initial[0])
+                search_name += "+OR+{} {} {}[Full Author Name]".format(lastname, firstname, initial)
+                search_name += "+OR+{} {} {}[Full Author Name]".format(lastname, firstname, initial[0])
                  
 
             if lastname and firstname:
-                search_name += "+OR+{} {}[Author]".format(lastname, firstname)
-                search_name += "+OR+{} {}[Author]".format(firstname, lastname)
-                search_name += "+OR+{} {}[Author]".format(lastname, firstname[0])
+                search_name += "+OR+{} {}[Full Author Name]".format(lastname, firstname)
+                search_name += "+OR+{} {}[Full Author Name]".format(firstname, lastname)
+                search_name += "+OR+{} {}[Full Author Name]".format(lastname, firstname[0])
 
             url = PUBMED_SEARCH_URL.format(search_name)
 
@@ -334,13 +335,14 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
         r = requests.get(url=url,headers= {"Content-Type": "application/xml","accept": "application/xml"})
         if r.status_code == 200:
             json_data = json.loads(xml_to_json(r.text))
+            
         else:
             raise Exception("Error occured while comunicating with pubmed{}".format(r.status_code))
         
         if int(json_data["eSearchResult"]["Count"]) <= 0:
             return {"ids_info":{},"count":0 }
 
-        id_list = json_data["eSearchResult"]["IdList"].get("Id",None)
+        id_list = json_data["eSearchResult"]["IdList"].get("Id",None)        
 
         return_data = {"ids_info":{}}
         for _id in id_list:
@@ -375,9 +377,9 @@ def download_csv(query_data=None, local=False):
 
         ids = ",".join(query_data["ids_info"].keys())
 
-        url = PUBMED_DOWNLOAD_CSV.format(ids)
+        url = PUBMED_DOWNLOAD_CSV
         print("pubmed download csv url: {}".format(url))
-        r = requests.get(url=url,headers= {"Content-Type": "application/xml","accept": "application/xml"})
+        r = requests.post(url=url, data="id={}".format(ids),headers= {"accept": "application/xml"})
         if r.status_code == 200:
             json_data = json.loads(xml_to_json(r.text))
             if type(json_data["PubmedArticleSet"]["PubmedArticle"]) == dict:
