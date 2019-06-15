@@ -143,6 +143,8 @@ def get_short_details(journal):
     return data
 
 def get_create_date(pub_dates):
+    if type(pub_dates) == dict:
+        pub_dates = [pub_dates]
     for date in pub_dates:
         if date["@PubStatus"] in ["pubmed", "medline"]:
             data = "{}/{}/{}".format(date.get("Year",""), date["Month"], date["Day"])
