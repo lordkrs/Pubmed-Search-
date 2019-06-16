@@ -269,7 +269,7 @@ def do_upload():
             initial = column_data["Middle_Name"] if column_data.get("Middle_Name") else None
             lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
             if name is not None:
-                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=20000)
+                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
                 if search_data["count"] != 0:
                     
                     ids_return_data["ids_info"].update(search_data["ids_info"])                
@@ -307,15 +307,15 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
         if search_name:
         
             if firstname and initial and lastname:
-                search_name += "+OR+{} {}{}[Full Author Name]".format(lastname, firstname[0], initial[0])
-                search_name += "+OR+{} {} {}[Full Author Name]".format(lastname, firstname, initial)
-                search_name += "+OR+{} {} {}[Full Author Name]".format(lastname, firstname, initial[0])
+                search_name += "+OR+{}, {}{}[Full Author Name]".format(lastname, firstname[0], initial[0])
+                search_name += "+OR+{}, {} {}[Full Author Name]".format(lastname, firstname, initial)
+                search_name += "+OR+{}, {} {}[Full Author Name]".format(lastname, firstname, initial[0])
                  
 
             if lastname and firstname:
-                search_name += "+OR+{} {}[Full Author Name]".format(lastname, firstname)
+                search_name += "+OR+{}, {}[Full Author Name]".format(lastname, firstname)
                 search_name += "+OR+{} {}[Full Author Name]".format(firstname, lastname)
-                search_name += "+OR+{} {}[Full Author Name]".format(lastname, firstname[0])
+                search_name += "+OR+{}, {}[Full Author Name]".format(lastname, firstname[0])
 
             url = PUBMED_SEARCH_URL.format(search_name)
 
