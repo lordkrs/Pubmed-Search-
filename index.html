@@ -77,52 +77,93 @@
         }
 
     </script>
-</head>
-<body>    
-        <form id="search" class="form-style-9" action="/search"  method="post">
-            <ul>
-                <li>
-                    <input id="Name" type="text" name="Name"   class="field-style field-split align-left" placeholder="Name" autocomplete="on" required/>
-                </li>
+   
+    <link rel="stylesheet" href="css/bootstrap.min.css">
 
-                <li>
+        
+</head>
+<body background="css/background.jpg" >   
+         <form id="search" class="form-style-9" action="/search"  method="post">
+            <div class="form-group row">
+                  <label  class="font-weight-bold col-sm-2 col-form-label ">Name:</label>
+                  <div class="col-sm-10">
+                    <input id="Name" type="text" name="Name"   class="field-style field-split align-left" placeholder="Name" autocomplete="on" required/>
+                </div>
+            </div>
+            <div class="form-group row">
+                    <label  class=" font-weight-bold col-sm-2 col-form-label">First Name:</label>
+                    <div class="col-sm-10">
                     <input id="FirstName" type="text" name="FirstName"   class="field-style field-split align-left" placeholder="FirstName" autocomplete="on"/>
+                </div>
+            </div>
+
+                    <div class="form-group row">
+                            <label  class="font-weight-bold col-sm-2 col-form-label">Initial:</label>
+                            <div class="col-sm-10">
                     <input id="Initial" type="text" name="Initial"   class="field-style field-split align-right" placeholder="Initial" autocomplete="on"/>
-                </li>
-                <li>
+                 </div>
+            </div>
+                    <div class="form-group row">
+                            <label  class="font-weight-bold col-sm-2 col-form-label">LastName:</label>
+                            <div class="col-sm-10">
                     <input id="Lastname" type="text" name="Lastname"   class="field-style field-split align-left" placeholder="Lastname" autocomplete="on"/>
+                </div>
+            </div>
+                    
+                    <div class="form-group row">
+                            <label  class=" font-weight-bold col-sm-2 col-form-label">Universal ID:</label>
+                            <div class="col-sm-10">
                     <input id="Uid" type="text" name="Uid"  class="field-style field-split align-right" placeholder="Uid" autocomplete="on" required/>            
-                </li>
-                <li>
+                </div>
+            </div>
+
+                    <div class="form-group row">
+                            <label  class="font-weight-bold col-sm-2 col-form-label">From Date:</label>
+                            <div class="col-sm-10">
                     <input id="from_date" type="date" name="from_date" class="field-style field-split align-left" placeholder="from_date" />
+              </div>
+           
+                            <label  class="font-weight-bold col-sm-2 col-form-label">To Date:</label>
+                            <div class="col-sm-10">
                     <input id="to_date" type="date" name="to_date"  class="field-style field-split align-right" placeholder="to_date" />
-                </li>
-                <li>
-                    <input id="records" type="text" name="records" value="420"  class="field-style field-split align-right" placeholder="records" autocomplete="on"/>            
-                </li>
-                <li>
-                <input type="submit" value="Search" />
-                </li>
-            </ul>
+                </div>
+            </div>    
+                  
+            <div class="form-group row">
+                            <label  class="font-weight-bold col-sm-2 col-form-label">Records:</label>
+                            <div class="col-sm-10">
+                    <input id="records" type="text"  name="records" value="4000"  class="field-style field-split align-right" placeholder="records" autocomplete="on"/>            
+                </div>
+            </div>
+
+                <input type="submit" value="Search" class="btn btn-primary"/>
+                <input type="reset" class="btn btn-warning">
+        </div>
         </form>
+     
         <form id="upload" class="form-style-9" action="/upload" method="post" enctype="multipart/form-data">
-            <ul>
-                <li>
+            <div class="form-group row">
+                    <label  class="font-weight-bold col-sm-2 col-form-label">From Date:</label>
+                    <div class="col-sm-10">
                     <input id="from_date" type="date" name="from_date"  class="field-style field-split align-left" placeholder="from_date" />
+                </div>
+            </div>
+                    <div class="form-group row">
+                            <label  class="font-weight-bold col-sm-2 col-form-label">To Date:</label>
+                            <div class="col-sm-10">
                     <input id="to_date" type="date" name="to_date"  class="field-style field-split align-right" placeholder="to_date" />
-                </li>
-                <li>
-                    <input id="file" type="file" name="upload" class="field-style field-split align-left" placeholder="upload" required/>
-                </li>
-                
-                <li>
-                    <input type="submit" value="Start upload" />
-                </li>
-            </ul>
+                </div>
+            </div>
+                    <div class="form-group row">
+                            <label  class="font-weight-bold col-sm-2 col-form-label">Upload File:</label>
+                            <div class="col-sm-10">
+                    <input id="file" type="file" name="upload" class="field-style field-split align-left" placeholder="upload" accept=".xls,.xlsx"  required/>
+                </div>
+            </div>
+                    <input type="submit" value="Start upload" class="btn btn-primary"0/>
+                    <input type="reset" class="btn btn-warning">
         </form>
-        <!-- <from id="clear_tmp" class="form-style-9" action="/clear_tmp" method="post" >
-            <input id="records" type="text" name="records" value="420"  class="field-style field-split align-right" placeholder="records" autocomplete="on"/>            
-            <input type="submit" value="Clear Cache" />
-        </from> -->
+   
+
 </body>
 </html>
