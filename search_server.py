@@ -307,14 +307,14 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
         if search_name:
         
             if firstname and initial and lastname:
+                search_name += "+OR+{}{} {}[Full Author Name]".format(firstname[0], initial[0],lastname)
                 search_name += "+OR+{}, {}{}[Full Author Name]".format(lastname, firstname[0], initial[0])
                 search_name += "+OR+{}, {} {}[Full Author Name]".format(lastname, firstname, initial)
                 search_name += "+OR+{}, {} {}[Full Author Name]".format(lastname, firstname, initial[0])
                  
-
             if lastname and firstname:
                 search_name += "+OR+{}, {}[Full Author Name]".format(lastname, firstname)
-                search_name += "+OR+{} {}[Full Author Name]".format(firstname, lastname)
+                search_name += "+OR+{} {}[Author]".format(firstname, lastname)
                 search_name += "+OR+{}, {}[Full Author Name]".format(lastname, firstname[0])
 
             url = PUBMED_SEARCH_URL.format(search_name)
