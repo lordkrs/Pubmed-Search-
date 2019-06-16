@@ -385,12 +385,15 @@ def download_csv(query_data=None, local=False):
             if type(json_data["PubmedArticleSet"]["PubmedArticle"]) == dict:
                 json_data["PubmedArticleSet"]["PubmedArticle"] = [json_data["PubmedArticleSet"]["PubmedArticle"]]
             
+            data_count = 1
             for data in json_data["PubmedArticleSet"]["PubmedArticle"]:
                 medline_data = data["MedlineCitation"]
                 article_data = medline_data["Article"]
                 publication_date = data["PubmedData"]
                 mesh_heading_data = medline_data.get("MeshHeadingList",{})
                 form_data = {}
+                print("Name---->{}, data found-->({}/{})".format( query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], data_count,len(query_data["ids_info"].keys())))
+                data_count += 1
                 if type(article_data["ArticleTitle"]) == dict:
                     form_data["Title"] = article_data["ArticleTitle"]["#text"]
                 else:
