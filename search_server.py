@@ -307,15 +307,19 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
         if search_name:
         
             if firstname and initial and lastname:
-                search_name += "+OR+{}{} {}[Full Author Name]".format(firstname[0], initial[0],lastname)
-                search_name += "+OR+{}, {}{}[Full Author Name]".format(lastname, firstname[0], initial[0])
-                search_name += "+OR+{}, {} {}[Full Author Name]".format(lastname, firstname, initial)
-                search_name += "+OR+{}, {} {}[Full Author Name]".format(lastname, firstname, initial[0])
+                search_name += '+OR+"{}{} {}"[Full Author Name]'.format(firstname[0], initial[0],lastname)
+                search_name += '+OR+"{}, {}{}"[Full Author Name]'.format(lastname, firstname[0], initial[0])
+                search_name += '+OR+"{} {}{}"[Author]'.format(lastname, firstname[0], initial[0])
+                search_name += '+OR+"{}, {} {}"[Full Author Name]'.format(lastname, firstname, initial)
+                search_name += '+OR+"{}, {} {}"[Full Author Name]'.format(lastname, firstname, initial[0])
+                search_name += '+OR+"{} {} {}"[Author]'.format(initial, lastname, firstname)
                  
             if lastname and firstname:
-                search_name += "+OR+{}, {}[Full Author Name]".format(lastname, firstname)
-                search_name += "+OR+{} {}[Author]".format(firstname, lastname)
-                search_name += "+OR+{}, {}[Full Author Name]".format(lastname, firstname[0])
+                search_name += '+OR+"{}, {}"[Full Author Name]'.format(lastname, firstname)
+                search_name += '+OR+"{} {}"[Author]'.format(firstname, lastname)
+                search_name += '+OR+"{}, {}"[Full Author Name]'.format(lastname, firstname[0])
+                search_name += '+OR+"{} {}"[Author]'.format(lastname, firstname[0])
+
 
             url = PUBMED_SEARCH_URL.format(search_name)
 
@@ -332,17 +336,20 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
         url += "&retmax={}".format(records_per_page)
 
         print("pubmed search url: {}".format(url))
-        r = requests.get(url=url,headers= {"Content-Type": "application/xml","accept": "application/xml"})
+        r = requests.post(url=url,headers= {"Content-Type": "application/xml","accept": "application/xml"})
         if r.status_code == 200:
             json_data = json.loads(xml_to_json(r.text))
-            
         else:
             raise Exception("Error occured while comunicating with pubmed{}".format(r.status_code))
         
         if int(json_data["eSearchResult"]["Count"]) <= 0:
             return {"ids_info":{},"count":0 }
 
-        id_list = json_data["eSearchResult"]["IdList"].get("Id",None)        
+
+        id_list = json_data["eSearchResult"]["IdList"].get("Id",None) 
+      
+        if type(id_list) in [str, int, unicode]:
+            id_list = [id_list]
 
         return_data = {"ids_info":{}}
         for _id in id_list:
@@ -375,7 +382,10 @@ def download_csv(query_data=None, local=False):
         if not query_data.get("count") or not query_data.get("ids_info"):
             raise Exception("Invalid data provided")
 
-        ids = ",".join(query_data["ids_info"].keys())
+        if len(query_data["ids_info"].keys()) == 1 :
+            ids = query_data["ids_info"].keys()[0]
+        else:
+            ids = ",".join(query_data["ids_info"].keys())
 
         url = PUBMED_DOWNLOAD_CSV
         print("pubmed download csv url: {}".format(url))
