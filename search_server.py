@@ -185,6 +185,7 @@ def get_full_name(name, auther_list):
     return name
 
 def get_author_position(name, auther_list):
+    data = ""
     if type(auther_list) == dict:
         auther_list = [auther_list]
     name_list = name.replace(",","").lower().split(" ")
@@ -195,13 +196,14 @@ def get_author_position(name, auther_list):
             author["ForeName"] = ""
         if author.get("LastName", ""):
             if author.get("LastName", "").lower() in name_list:
-                if author.get("ForeName", ""):
-                    forename = author.get("ForeName", "").split(" ")[0]
-                    if forename.lower() in name_list:
-                        return auther_list.index(author) + 1
-                else:
-                    return auther_list.index(author) + 1
-    return 0
+                data += str(auther_list.index(author) + 1) + " | "
+                # if author.get("ForeName", ""):
+                #     forename = author.get("ForeName", "").split(" ")[0]
+                #     if forename.lower() in name_list:
+                #         return auther_list.index(author) + 1
+                # else:
+                #     return auther_list.index(author) + 1
+    return data
 
 
 def get_publication_type(publication_type_list):
@@ -356,7 +358,7 @@ def search_citations(name=None, initial=None, lastname=None, firstname=None, uni
             return_data["ids_info"][_id] = {"name": name,"query":query_url,"univeral_id":universal_id}
 
         return_data["count"] = len(return_data["ids_info"].keys())
-
+        print("Total Found:{}".format(return_data["count"]))
         if return_data["count"] != 0:
 
             if not local_searh:
