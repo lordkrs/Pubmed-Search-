@@ -1,0 +1,260 @@
+{  
+   "clinical_study":{  
+      "last_update_submitted":"March 2, 2019",
+      "completion_date":{  
+         "#text":"September 2021",
+         "@type":"Anticipated"
+      },
+      "responsible_party":{  
+         "responsible_party_type":"Sponsor"
+      },
+      "detailed_description":{  
+         "textblock":"Introduction:\n\n      Despite advances in surgical and perioperative care, postoperative complications after\n       
+cardiac surgery remain frequent, leading to substantial increases in mortality, morbidity,\n      and costs. Postoperatively, 30% of patients who underwent coronary artery bypass graft (CABG)\n      present atrial fibrillation (AF). The presence of POAF is associated with a greater short and\n      long term cardiovascular morbidity and mortality (death, stroke, heart failure, myocardial\n      infarction) and is at the origin of a significant increase in hospitalization stay.\n\n      The mechanisms underlying POAF are multifactorial and complex but require at least the\n      presence of an arrhythmogenic substrate, cardiac fibrosis and electrical remodelling.\n      Aldosterone is a key component in this context. The link between aldosterone, cardiac\n      fibrosis and adverse electrical remodelling is now very well established and a significant\n      association between plasma aldosterone levels, MRA and AF incidence is now well established.\n\n      In a preliminary study, the investigators established the relationship between preoperative\n      plasma aldosterone levels and post-operative AF occurrence in patients addressed for CABG\n      without any systolic heart failure or mitral valve surgery associated (NCT 02814903). The\n      investigators have thus demonstrated that plasma aldosterone levels were strongly predictive\n      of post-operative AF occurrence. These results permitted to establish a risk score called\n  
+     "         Aldoscore" (including the patient\"s age and the aldosterone level) to detect patients at\n      high risk to develop post-operative AF. The investigators also validated this score in an\n      independent and external Japanese population issued from the NU-HIT trial.\n\n      Investigators propose to perform a randomized,
+         multicenter,
+         double-blind versus  
+placebo study\n      to evaluate the efficacy of spironolactone administrated 14 days before heart surgery and\n      continued during 30 days after surgery,
+         on POAF incidence in patients referred for CABG\n      without any heart failure or mitral valve surgery associated.\n\n      Materials and methods:\n\n      ALDOCURE trial will be a multicenter,
+         landmark,
+         randomized,
+         double blind placebo-controlled\n      trial of the MRA,
+         spironolactone,
+         in 1500 adults referred for on-pump elective CABG surgery \xb1\n      AVR without any heart failure.\n\n      In each center,
+         all patients referred for CABG \xb1 AVR will be systematically considered for\n      inclusion. After assessment of inclusion and exclusion criteria and 
+following collection of\n      the patient\"s written consent,
+         the 1500 patients will be randomized in a 1:1         ratio to either\n      receive 25 mg oral spironolactone once daily or placebo on top of standard therapy,
+         started\n      14 \xb1 4 days before cardiac surgery and continued during 30 days after surgery. All subjects\n      are to be treated using the most adapted therapy based on international guidelines. Such\n      treatments may also be adjusted by the local medical practitioner,
+         if necessary.\n      Investigators and patients will be aware of study group allocation. The randomization will be\n      done via an e-CRF randomization system and will be stratified by center using random\n      sequences of block sizes to keep the treatment group sizes similar. All randomized subjects\n      will be followed even if study drug is discontinued ahead of schedule,
+         except in the case\n      that the subject refuses to participate further in the study.\n\n      The trial duration is 3 years,
+         with 1 month of follow-up and a total duration participation\n      for the patient  
+of 44 \xb1 4 days. Follow-up study visits are summarized in the flow chart 1.\n      Patients will begin the treatment (spironolactone or placebo) at V0 and continue until V3.\n\n    
+   The primary and secondary endpoints can be found in the dedicated sections. The study\n      population will include those who meet the inclusion criteria (see in the dedicated\n 
+     sections).\n\n      Exclusion criteria can be found in the dedicated sections. An electrocardiogram (ECG) will be\n      performed at baseline and at each follow-up visits and a continuous ECG monitoring (in the\n      ICU or by Holter-ECG in the stepdown unit stay) will be performed during the first 5 days\n      after surgery to detect AF. Blood samples will be collected at baseline,
+         before\n      randomization,
+         at the planned preoperative assessment,
+         to measure aldosterone level added to\n      other classical examinations. Blood sample will be then stored in the Caen University CRB for\n      later use in ancillary studies. All clinical endpoints will be adjudicated by a clinical\n      events committee in a blinded fashion. The 25 mg dose of spironolactone was evoked to reduce\n      the risks and side-effects associated with this drug and according to previous clinical trial\n      using this drug in a cardiovascular context. The DSMB will be meeting at least twice (for the\n      intermediate analyses after the first 460 and 918 inclusions) to ensure the continued\n      scientific validity and merit of the study but it also will be able to be convened at any\n      time in case of any safety event occurrence. The DSMB chair will be notified 
+of any events\n      considered probable or definitely related to study drug occurring from randomization and\n      until the end of the study. At the time of notification,
+         he/she will determine if an\n      additional DSMB meeting is required. The study will be conducted according to the provisions\n      of the Declaration of Helsinki,
+         the International Conference on Harmonization (ICH)\n      Guidelines for Good Clinical Practice (GCP),
+         and applicable national and local regulations.\n\n      Perspectives:\n\n      ALDOCURE will assess the cardiovascular benefit of a low-cost aldosterone receptor blocker on\n      top of standard therapy in patients experiencing CABG surgery \xb1 AVR without heart failure on\n       
+the risk of developing POAF,
+         an issue that never been assess. The preliminary results\n      obtained by the investigators allow to have a strong rational to perform this interventional\n      study.\n\n      Investigators believe that this large landmark study,
+         in case of a reduction of POAF\n      incidence by spironolactone,
+         will have an immediate effect on patients care and a major\n      positive impact from an economic point of view,
+         since it will shift the balance of preventive\n      strategies to the use of spironolactone,
+         a freely available,
+         low-cost and well tolerated\n      medication in high risk patients referred for CABG \xb1 AVR."
+      },
+      "has_expanded_access":"No",
+      "enrollment":{  
+         "#text":"1500",
+         "@type":"Anticipated"
+      },
+      "intervention":[  
+         {  
+            "intervention_name":"Spironolactone 25mg",
+            "description":"25 mg oral spironolactone once daily on top of standard therapy, started 14 \xb1 4 days before cardiac surgery and continued during 30 days after surgery.",
+            "arm_group_label":"experimental treatment",
+            "intervention_type":"Drug"
+         },
+         {  
+            "intervention_name":"Placebo oral capsule",
+            "description":"oral placebo once daily on top of standard therapy, started 14 \xb1 4 days before cardiac surgery and continued during 30 days after surgery.",
+            "arm_group_label":"Reference treatment",
+            "intervention_type":"Drug"
+         }
+      ],
+      "study_first_posted":{  
+         "#text":"June 11, 2018",
+         "@type":"Actual"
+      },
+      "study_design_info":{  
+         "allocation":"Randomized",
+         "primary_purpose":"Treatment",
+         "intervention_model":"Parallel Assignment",
+         "masking":"Quadruple (Participant, Care Provider, Investigator, Outcomes Assessor)"
+      },
+      "source":"University Hospital, Caen",
+      "overall_contact":{  
+         "phone":"+33231065349",
+         "last_name":"Cathy Gaillard",
+         "email":"gaillard-c@chu-caen.fr"
+      },
+      "official_title":"Spironolactone and Perioperative Atrial Fibrillation Occurrence in Cardiac Surgery Patients: a Multicenter Randomized, Double-blind Study. The ALDOCURE Trial",
+      "primary_completion_date":{  
+         "#text":"July 2021",
+         "@type":"Anticipated"
+      },
+      "location":[  
+         {  
+            "status":"Recruiting",
+            "contact":{  
+               "phone":"+33231064670",
+               "last_name":"Joachim Alexandre",
+               "email":"alexandre-j@chu-caen.fr"
+            },
+            "facility":{  
+               "name":"CHU Caen",
+               "address":{  
+                  "city":"Caen",
+                  "state":"Normandy",
+                  "zip":"14000",
+                  "country":"France"
+               }
+            }
+         },
+         {  
+            "status":"Not yet recruiting",
+            "facility":{  
+               "name":"Gaillard",
+               "address":{  
+                  "city":"Caen",
+                  "state":"Normandy",
+                  "zip":"14000",
+                  "country":"France"
+               }
+            },
+            "contact":{  
+               "last_name":"Cathy Gaillard",
+               "email":"gaillard-c@chu-caen.fr"
+            },
+            "investigator":{  
+               "last_name":"Joachim Alexandre, MD, PhD",
+               "role":"Principal Investigator"
+            }
+         }
+      ],
+      "number_of_arms":"2",
+      "last_update_posted":{  
+         "#text":"March 5, 2019",
+         "@type":"Actual"
+      },
+      "start_date":{  
+         "#text":"February 26, 2019",
+         "@type":"Actual"
+      },
+      "id_info":{  
+         "org_study_id":"2018-000263-92",
+         "nct_id":"NCT03551548"
+      },
+      "eligibility":{  
+         "criteria":{  
+            "textblock":"Inclusion Criteria:\n\n          -  Male or female; Age \u2265 18 years\n\n         
+  -  On-pump elective CABG surgery \xb1 AVR\n\n          -  In sinus rhythm\n\n          -  Patient signed consent\n\n          -  Willing to comply with scheduled visits, as outlined in the protocol\n\n          -  French nationality\n\n          -  Recipients of the social security regime\n\n        Exclusion Criteria:\n\n          -  Contraindications to spironolactone therapy: intolerance, hyperkalemia (>5.0 mmol/L),\n             severe renal dysfunction (defined as an estimated glomerular filtration rate (eGFR) <\n             30 ml/min. Subjects with serum creatinine \u22652.5 mg/dl are also excluded even if their\n             eGFR is \u226530 ml/min), Severe liver dysfunction (Child-Pugh Class 3), patients treated\n             by other potassium sparing medication (except in case of hypokalemia).\n\n          -  Patients treated by MRA treatment (spironolactone or eplerenone)\n\n        
+  -  LVEF < 50% obtained within 6 months prior to V0\n\n          -  Mitral valve surgery associated to the CABG\n\n          -  Off-pump beating or emergent/urgent CABG\n\n 
+ -  History of AF or another atrial arrhythmia\n\n          -  Presence of antiarrhythmic medication (other than \u03b2-blockers)\n\n          -  Previous heart surgery and heart transplant recipient\n\n          -  Unstable conditions: angina or acute coronary syndrome or heart failure during the\n             last 3 months, cardiogenic shock\n\n          -  Patients included or planning to be included in another medical research protocol\n\n          -  Patients unable to complete the protocol follow-up\n\n          -  Pregnant or nursing women\n\n          -  Adults with protective measures (curatorship or tutorship or safeguarding justice or\n             juridical protection)"
+         },
+         "gender":"All",
+         "minimum_age":"18 Years",
+         "healthy_volunteers":"No",
+         "maximum_age":"N/A"
+      },
+      "patient_data":{  
+         "sharing_ipd":"Undecided"
+      },
+      "arm_group":[  
+         {  
+            "arm_group_label":"Reference treatment",
+            "arm_group_type":"Placebo Comparator"
+         },
+         {  
+            "description":"Spironolactone 25 mg",
+            "arm_group_label":"experimental treatment",
+            "arm_group_type":"Experimental"
+         }
+      ],
+      "sponsors":{  
+         "collaborator":{  
+            "agency":"Ministry of Health, France",
+            "agency_class":"Other"
+         },
+         "lead_sponsor":{  
+            "agency":"University Hospital, Caen",
+            "agency_class":"Other"
+         }
+      },
+      "secondary_outcome":[  
+         {  
+            "time_frame":"5 days",
+            "measure":"Post-operative AF occurrence from cardiac surgery and within 5 days after CABG surgery (+/- AVR),"
+         },
+         {  
+            "time_frame":"2 days",
+            "measure":"Evaluation of perioperative myocardial injury within 2 days after surgery, as assessed by serial measurements of the cardiac troponin I concentration at day 0 immediately after surgery, day 1 and 2 after surgery,"
+         },
+         {  
+            "time_frame":"30 days",
+            "measure":"Occurrence of major cardiovascular events and death (death from any cause, stroke, heart failure, myocardial infarction) occurring within 30 days after surgery,"
+         },
+         {  
+            "time_frame":"30 days",
+            "measure":"Duration of ICU and hospital stay,"
+         },
+         {  
+            "time_frame":"30 days",
+            "measure":"Need for readmission,"
+         },
+         {  
+            "time_frame":"30 days",
+            "measure":"Evaluation of the LVEF at discharge (from both ICU and hospital discharge),"
+         },
+         {  
+            "time_frame":"5 days",
+            "measure":"Ventricular arrhythmia occurring from cardiac surgery and within 5 days after surgery, assess, in a standardized manner, by continuous ECG monitoring (during the ICU stay) or Holter-ECG monitoring (during the stepdown unit stay),"
+         },
+         {  
+            "time_frame":"30 days",
+            "measure":"Occurrence of low blood pressure (both systolic and diastolic), changes in serum potassium and acute kidney injury within 30 days after surgery."
+         }
+      ],
+      "@rank":"1",
+      "study_type":"Interventional",
+      "overall_status":"Recruiting",
+      "primary_outcome":{  
+         "time_frame":"5 days",
+         "description":"the occurrence of POAF occurring from randomization and within 5 days after surgery, assess, in a standardized manner, by continuous ECG 
+monitoring (during the ICU stay) or Holter-ECG monitoring (during the stepdown unit stay).",
+         "measure":"POAF occurrence"
+      },
+      "phase":"Phase 3",
+      "condition":[  
+         "Cardiac Surgery",
+         "Atrial Fibrillation",
+         "Aldosterone Blockade"
+      ],
+      "location_countries":{  
+         "country":"France"
+      },
+      "brief_summary":{  
+         "textblock":"Study hypothesis : Pre-operative aldosterone receptor blockade may reduce post-operative\n      atrial fibrillation (POAF) occurrence within 5 days after coronary artery bypass graft\n      surgery (CABG) \xb1 aortic valve replacement (AVR) without any heart failure or any mitral\n      surgery.\n\n      Primary efficacy criterion : occurrence of POAF occurring from randomization and within 5\n      days after surgery, assess, in a standardized manner, by continuous ECG monitoring (during\n      the ICU stay) or Holter-ECG monitoring (during the stepdown unit stay).\n\n      Primary objective: To establish whether pre-operative administration of spironolactone leads\n      to a reduction in POAF incidence occurring from randomization and within 5 days after\n      surgery, compared with placebo, in patients referred for on-pump elective CABG surgery \xb1 AVR\n      without heart failure.\n\n      Study design : Phase III drug trial - Randomized, double blind, multicentre, prospective\n      study."
+      },
+      "oversight_info":{  
+         "is_fda_regulated_device":"No",
+         "is_fda_regulated_drug":"No",
+         "is_us_export":"No",
+         "has_dmc":"Yes"
+      },
+      "acronym":"ALDOCURE",
+      "other_outcome":{  
+         "time_frame":"30 days",
+         "measure":"Ability of the Aldoscore to predict POAF and cardiovascular complications and mortality."
+      },
+      "intervention_browse":{  
+         "mesh_term":"Spironolactone"
+      },
+      "study_first_submitted_qc":"June 8, 2018",
+      "required_header":{  
+         "url":"https://clinicaltrials.gov/show/NCT03551548",
+         "link_text":"Link to the current ClinicalTrials.gov record.",
+         "download_date":"ClinicalTrials.gov processed this data on June 21, 2019"
+      },
+      "study_first_submitted":"May 29, 2018",
+      "brief_title":"Spironolactone and Perioperative Atrial Fibrillation Occurrence in Cardiac Surgery Patients.",
+      "verification_date":"May 2018",
+      "condition_browse":{  
+         "mesh_term":"Atrial Fibrillation"
+      },
+      "last_update_submitted_qc":"March 2, 2019"
+   }
+}
