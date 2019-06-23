@@ -244,7 +244,9 @@ def do_upload():
     from_date = request.forms.get('from_date') if request.forms.get('from_date') else None
     to_date = request.forms.get('to_date') if request.forms.get('to_date') else None
     search_type = request.forms.get("search_type") if request.forms.get('search_type') else None
-
+    header_ = pubmed_headers
+    if search_type == "Clinical Trails":
+        header_ = trails_headers
     if from_date and to_date:
         if datetime.datetime.strptime(from_date, "%Y-%m-%d") > datetime.datetime.strptime(to_date, "%Y-%m-%d"):
             return '<html><script>alert("from date should be lesser than to date");</script><html>'
@@ -273,16 +275,20 @@ def do_upload():
             initial = column_data["Middle_Name"] if column_data.get("Middle_Name") else None
             lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
             if name is not None:
-                search_data = search_citations(name=name, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
+                search_data = search_citations(name=name, search_type=search_type, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
+                if search_type == "Clinical Trails":
+                    xlsx_data_list.append(search_data)
+                    ids_return_data = {"ids_info":{},"count":1}
+                    continue
+
                 if search_data["count"] != 0:
-                    
                     ids_return_data["ids_info"].update(search_data["ids_info"])                
                     ids_return_data["count"] += len(search_data["ids_info"].keys())
                     xlsx_data_list.append(download_csv(search_data, local=True))
 
         if ids_return_data["count"] != 0:
             
-            file_path = create_xlsx(data_list=xlsx_data_list, local=True)
+            file_path = create_xlsx(data_list=xlsx_data_list, local=True, headers=header_)
             return static_file(file_path, temp_path, download=file_path)
     except Exception as ex:
         print("Exception in upload:{}".format(ex))
@@ -304,8 +310,11 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
             search_type = request.forms.get("search_type") if request.forms.get('search_type') else None
         
         if search_type == "Clinical Trails":
-            file_ = clinical_trails(name, universal_id, lastname=lastname, initial=initial, firstname=firstname)
-            return static_file(file_, temp_path, download=file_)
+            file_ = clinical_trails(name, universal_id, lastname=lastname, initial=initial, firstname=firstname,local=local_searh)
+            if local_searh:
+                return file_
+            else:
+                return static_file(file_, temp_path, download=file_)
 
         url = None
         if not name:
@@ -519,6 +528,8 @@ def get_facilities(facilities, name, last_name=None):
 
 
     for facility in facilities:
+        if not facility["facility"].get("name"):
+            continue
         for name_ in search_name:
             if name_ in facility["facility"]["name"]:
                 return facility["facility"]["name"], "{}_{}_{}".format(facility["facility"]["address"].get("country"),facility["facility"]["address"].get("city"), facility["facility"]["address"].get("zip"))
@@ -530,6 +541,8 @@ def get_other_associates(facilities):
         facilities = [facilities]
     data = ""
     for facility in facilities:
+        if not facility["facility"].get("name"):
+            continue
         data += facility["facility"]["name"] + "|"
     return data
 
@@ -547,7 +560,7 @@ def get_start_date(date_):
     else:
         return date_
 
-def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None):
+def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, local=False):
     print("name:{},lastname:{}".format(name,lastname))
     t = Trials()
     zip_folder_path = os.path.join(temp_path,str(uuid.uuid4()))
@@ -596,11 +609,15 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None):
         form_data["Trial Phase"] = clinical_study.get("phase","N/A")
 
         form_data["Overall Status"] = clinical_study["overall_status"]
-        form_data["Start Date"] = get_start_date(clinical_study["start_date"])
+        form_data["Start Date"] = get_start_date(clinical_study["start_date"]) if clinical_study.get("start_date") else ""
+
         if clinical_study.get("completion_date"):
-            form_data["End Date"] = clinical_study["completion_date"]["#text"]
-        else:
+
+            form_data["End Date"] = clinical_study["completion_date"]["#text"] if type(clinical_study["completion_date"]) == dict else clinical_study["completion_date"]
+        elif clinical_study.get("primary_completion_date"):
             form_data["End Date"] = clinical_study["primary_completion_date"]["#text"]
+        else:
+            form_data["End Date"] = "N/A"
         form_data["Conditions"] = " | ".join(clinical_study["condition"]) if type(clinical_study["condition"]) == list else clinical_study["condition"]
         if clinical_study.get("intervention"):
             form_data["Interventions"] = get_interventions(clinical_study["intervention"])
@@ -625,6 +642,8 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None):
     
     if not xlsx_data:
         raise Exception("Error occured while comunicating with clinical Trials")
+    if local:
+        return xlsx_data
 
     file_name = create_xlsx(data=xlsx_data, local=False, headers=trails_headers)
 
