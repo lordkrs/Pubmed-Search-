@@ -300,7 +300,7 @@ def do_upload():
             lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
             if name is not None:
                 try:
-                    search_data = search_citations(name=name, search_type=search_type, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
+                    search_data = search_citations(name=name, search_type=search_type,sheet_len=sheet_len,initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
                 except Exception as ex:
                     if xlsx_data_list:
                         break
@@ -328,7 +328,7 @@ def do_upload():
 
 
 @route("/search", method='POST')
-def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="400", local_searh=False):
+def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="400", local_searh=False,sheet_len=SHEET_LIMIT):
     try:
         if not local_searh:
             name = request.forms.get('Name')  if request.forms.get('Name') else None
