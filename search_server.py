@@ -33,7 +33,7 @@ trails_headers = ['GM Universal Code', 'Full Name', 'NCT ID', 'URL', 'Verificati
  'Start Date', 'End Date', 'Conditions', 'Interventions', 'Role', 'Facility', 'Region', 'Other Associates', 'Organizations', 'Lead Sponsor(s)']
 
 
-def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers):
+def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers,sheet_limit=SHEET_LIMIT):
     file_name = str(uuid.uuid4())+".xlsx"
     sheet_number = 1
     workbook = xlsxwriter.Workbook(temp_path + os.path.sep + file_name)
@@ -53,7 +53,7 @@ def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers):
                 worksheet.write(row, col, col_data[header])
                 col += 1
 
-            if row >= SHEET_LIMIT:
+            if row >= sheet_limit:
                 row = 0
                 col = 0
                 sheet_number += 1
@@ -71,7 +71,7 @@ def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers):
                     #print("header--> {}:data-->{}:type--->{}".format(header,col_data[header],type(col_data[header])))
                     worksheet.write(row, col, col_data[header])
                     col += 1
-                if row >= SHEET_LIMIT:
+                if row >= sheet_limit:
                     row = 0
                     col = 0
                     sheet_number += 1
@@ -266,6 +266,8 @@ def do_upload():
     from_date = request.forms.get('from_date') if request.forms.get('from_date') else None
     to_date = request.forms.get('to_date') if request.forms.get('to_date') else None
     search_type = request.forms.get("search_type") if request.forms.get('search_type') else None
+    sheet_len = int(request.forms.get("sheet_len")) if request.forms.get('sheet_len') else SHEET_LIMIT 
+    
     header_ = pubmed_headers
     if search_type == "Clinical Trails":
         header_ = trails_headers
@@ -318,7 +320,7 @@ def do_upload():
 
         if ids_return_data["count"] != 0:
             
-            file_path = create_xlsx(data_list=xlsx_data_list, local=True, headers=header_)
+            file_path = create_xlsx(data_list=xlsx_data_list, local=True, headers=header_, sheet_limit=sheet_len)
             return static_file(file_path, temp_path, download=file_path)
     except Exception as ex:
         print("Exception in upload:{}".format(ex))
@@ -338,9 +340,10 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
             lastname = request.forms.get('Lastname')  if request.forms.get('Lastname') else None
             firstname = request.forms.get("FirstName") if request.forms.get('FirstName') else None
             search_type = request.forms.get("search_type") if request.forms.get('search_type') else None
+            sheet_len = int(request.forms.get("sheet_len")) if request.forms.get('sheet_len') else SHEET_LIMIT
         
         if search_type == "Clinical Trails":
-            file_ = clinical_trails(name, universal_id, lastname=lastname, initial=initial, firstname=firstname,local=local_searh)
+            file_ = clinical_trails(name, universal_id, lastname=lastname, initial=initial, firstname=firstname,local=local_searh,sheet_limit=sheet_len)
             if local_searh:
                 return file_
             else:
@@ -410,7 +413,7 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
         if return_data["count"] != 0:
 
             if not local_searh:
-                file_path = download_csv(query_data=return_data, local=local_searh)
+                file_path = download_csv(query_data=return_data, local=local_searh,sheet_limit=sheet_len)
                 return static_file(file_path, temp_path, download=file_path)
             else:
                 return return_data
@@ -421,7 +424,7 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
 
 
 @route("/pubmed/download")
-def download_csv(query_data=None, local=False):
+def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
     try:
         xlsx_data = []
         # if not local:
@@ -517,7 +520,7 @@ def download_csv(query_data=None, local=False):
         if local:
             return xlsx_data
 
-        file_name = create_xlsx(data=xlsx_data, local=False)
+        file_name = create_xlsx(data=xlsx_data, local=False, sheet_limit=sheet_limit)
 
         return file_name
     except Exception as ex:
@@ -596,7 +599,7 @@ def get_start_date(date_):
     else:
         return date_
 
-def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, local=False):
+def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, local=False,sheet_limit=SHEET_LIMIT):
     print("name:{},lastname:{}".format(name,lastname))
     try:
         t = Trials()
@@ -690,7 +693,7 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
         if local:
             return xlsx_data
 
-        file_name = create_xlsx(data=xlsx_data, local=False, headers=trails_headers)
+        file_name = create_xlsx(data=xlsx_data, local=False, headers=trails_headers,sheet_limit=sheet_limit)
 
         return file_name
 
