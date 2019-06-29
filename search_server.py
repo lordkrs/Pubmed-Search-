@@ -18,6 +18,8 @@ temp_path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "tmp"
 if not os.path.exists(temp_path):
     os.makedirs(temp_path)
 
+
+SHEET_LIMIT = 10000
 MY_API_KEY = "6f63b0b5ec41afd50bed862a0d61ff0ae709"
 PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
@@ -33,8 +35,9 @@ trails_headers = ['GM Universal Code', 'Full Name', 'NCT ID', 'URL', 'Verificati
 
 def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers):
     file_name = str(uuid.uuid4())+".xlsx"
+    sheet_number = 1
     workbook = xlsxwriter.Workbook(temp_path + os.path.sep + file_name)
-    worksheet = workbook.add_worksheet()
+    worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
     row = 0
     col = 0
     for header in headers:
@@ -49,6 +52,16 @@ def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers):
                 #print("header--> {}:data-->{}:type--->{}".format(header,col_data[header],type(col_data[header])))
                 worksheet.write(row, col, col_data[header])
                 col += 1
+
+            if row >= SHEET_LIMIT:
+                row = 0
+                col = 0
+                sheet_number += 1
+                worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
+                for header in headers:
+                    worksheet.write(row, col, header)
+                    col += 1
+                
     else:
         for data in data_list:
             for col_data in data:
@@ -58,6 +71,15 @@ def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers):
                     #print("header--> {}:data-->{}:type--->{}".format(header,col_data[header],type(col_data[header])))
                     worksheet.write(row, col, col_data[header])
                     col += 1
+                if row >= SHEET_LIMIT:
+                    row = 0
+                    col = 0
+                    sheet_number += 1
+                    worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
+                    for header in headers:
+                        worksheet.write(row, col, header)
+                        col += 1
+                    
 
     workbook.close()        
     return file_name
@@ -275,8 +297,16 @@ def do_upload():
             initial = column_data["Middle_Name"] if column_data.get("Middle_Name") else None
             lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
             if name is not None:
-                search_data = search_citations(name=name, search_type=search_type, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
+                try:
+                    search_data = search_citations(name=name, search_type=search_type, initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
+                except Exception as ex:
+                    if xlsx_data_list:
+                        break
+                    raise Exception(str(ex))
+
                 if search_type == "Clinical Trails":
+                    if search_data is None:
+                        continue
                     xlsx_data_list.append(search_data)
                     ids_return_data = {"ids_info":{},"count":1}
                     continue
@@ -314,7 +344,9 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
             if local_searh:
                 return file_
             else:
-                return static_file(file_, temp_path, download=file_)
+                if file_ is not None:
+                    return static_file(file_, temp_path, download=file_)
+                return "No Data found"
 
         url = None
         if not name:
@@ -374,6 +406,7 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
 
         return_data["count"] = len(return_data["ids_info"].keys())
 
+        print("Total records found ------------->{}".format(return_data["count"]))
         if return_data["count"] != 0:
 
             if not local_searh:
@@ -489,6 +522,9 @@ def download_csv(query_data=None, local=False):
         return file_name
     except Exception as ex:
         print("download_csv:Exception occurred: {}".format(ex))
+        if local:
+            if xlsx_data:
+                return xlsx_data
         abort(500, "Exception occurred: {}".format(ex))
 
 
@@ -562,92 +598,108 @@ def get_start_date(date_):
 
 def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, local=False):
     print("name:{},lastname:{}".format(name,lastname))
-    t = Trials()
-    zip_folder_path = os.path.join(temp_path,str(uuid.uuid4()))
-    if not os.path.exists(zip_folder_path):
-        os.makedirs(zip_folder_path)
-    file_path = os.path.join(zip_folder_path,str(uuid.uuid4())+ ".zip")
-    zip_file_ = open(file_path,"wb")
-    if lastname:
-        zip_data = t.download(search_term=lastname)
-    else:
-        zip_data = t.download(search_term=name)
-    zip_file_.write(zip_data)
-    zip_file_.close()
-    import zipfile
-    zip_ref = zipfile.ZipFile(file_path, 'r')
-    zip_ref.extractall(zip_folder_path)
-    zip_ref.close()
-    os.remove(file_path)
-    files = os.listdir(zip_folder_path)
-    print("Search results--->{}".format(len(files)))
-    clinical_trails_data = []
-    for file_ in files:
-        xml_file = os.path.join(zip_folder_path, file_)
-        xml_file_obj = open(xml_file,"r")
-        xml_data = xml_file_obj.read()
-        json_data = json.loads(xml_to_json(xml_data))
-        clinical_trails_data.append(json_data)
-        xml_file_obj.close()
-        os.remove(xml_file)
-    os.rmdir(zip_folder_path)
-
-    xlsx_data = []
-    for data in clinical_trails_data:
-        clinical_study = data["clinical_study"]
-        form_data = {}
-        form_data["GM Universal Code"] = _uuid
-        form_data["Full Name"] = name
-        form_data["NCT ID"] = clinical_study["id_info"]["nct_id"]
-        form_data["URL"] = clinical_study["required_header"]["url"]
-        form_data["Verification Status"] = "Probable"
+    try:
+        t = Trials()
+        zip_folder_path = os.path.join(temp_path,str(uuid.uuid4()))
+        if not os.path.exists(zip_folder_path):
+            os.makedirs(zip_folder_path)
+        file_path = os.path.join(zip_folder_path,str(uuid.uuid4())+ ".zip")
+        zip_file_ = open(file_path,"wb")
         if lastname:
-            form_data["Query Used"] = lastname
+            zip_data = t.download(search_term=lastname)
         else:
-            form_data["Query Used"] = name
-        form_data["Trial Name"] = clinical_study["brief_title"]     
-        form_data["Trial Phase"] = clinical_study.get("phase","N/A")
+            zip_data = t.download(search_term=name)
+        zip_file_.write(zip_data)
+        zip_file_.close()
+        import zipfile
+        try:
+            zip_ref = zipfile.ZipFile(file_path, 'r')
+            zip_ref.extractall(zip_folder_path)
+            zip_ref.close()
+        except Exception as ex:
+            os.remove(file_path)
+            os.rmdir(zip_folder_path)
+            if local:
+                return []
+            return None
 
-        form_data["Overall Status"] = clinical_study["overall_status"]
-        form_data["Start Date"] = get_start_date(clinical_study["start_date"]) if clinical_study.get("start_date") else ""
+        os.remove(file_path)
+        files = os.listdir(zip_folder_path)
+        print("Search results--->{}".format(len(files)))
+        clinical_trails_data = []
+        for file_ in files:
+            xml_file = os.path.join(zip_folder_path, file_)
+            xml_file_obj = open(xml_file,"r")
+            xml_data = xml_file_obj.read()
+            json_data = json.loads(xml_to_json(xml_data))
+            clinical_trails_data.append(json_data)
+            xml_file_obj.close()
+            os.remove(xml_file)
+        os.rmdir(zip_folder_path)
 
-        if clinical_study.get("completion_date"):
+        xlsx_data = []
+        for data in clinical_trails_data:
+            clinical_study = data["clinical_study"]
+            form_data = {}
+            form_data["GM Universal Code"] = _uuid
+            form_data["Full Name"] = name
+            form_data["NCT ID"] = clinical_study["id_info"]["nct_id"]
+            form_data["URL"] = clinical_study["required_header"]["url"]
+            form_data["Verification Status"] = "Probable"
+            if lastname:
+                form_data["Query Used"] = lastname
+            else:
+                form_data["Query Used"] = name
+            form_data["Trial Name"] = clinical_study["brief_title"]     
+            form_data["Trial Phase"] = clinical_study.get("phase","N/A")
 
-            form_data["End Date"] = clinical_study["completion_date"]["#text"] if type(clinical_study["completion_date"]) == dict else clinical_study["completion_date"]
-        elif clinical_study.get("primary_completion_date"):
-            form_data["End Date"] = clinical_study["primary_completion_date"]["#text"]
-        else:
-            form_data["End Date"] = "N/A"
-        form_data["Conditions"] = " | ".join(clinical_study["condition"]) if type(clinical_study["condition"]) == list else clinical_study["condition"]
-        if clinical_study.get("intervention"):
-            form_data["Interventions"] = get_interventions(clinical_study["intervention"])
-        else:
-            form_data["Interventions"] = ""
-        if clinical_study.get("overall_official"):
-            form_data["Role"] =  get_role(clinical_study["overall_official"])
-        else:
-            form_data["Role"] = ""
-        form_data["Associate Type"] = "N/A"
-        if clinical_study.get("location"):
-            form_data['Facility'],form_data['Region'] = get_facilities(clinical_study["location"], name,lastname)
-            form_data["Other Associates"] = get_other_associates(clinical_study["location"])
-        else:
-            form_data['Facility'] = ""
-            form_data["Other Associates"] = ""
-            form_data['Region'] = ""
-        form_data["Trial Type"] = clinical_study.get("study_type","")
-        form_data["Organizations"] = clinical_study["source"]
-        form_data["Lead Sponsor(s)"] = get_sponsers(clinical_study["sponsors"])
-        xlsx_data.append(form_data)
-    
-    if not xlsx_data:
-        raise Exception("Error occured while comunicating with clinical Trials")
-    if local:
-        return xlsx_data
+            form_data["Overall Status"] = clinical_study["overall_status"]
+            form_data["Start Date"] = get_start_date(clinical_study["start_date"]) if clinical_study.get("start_date") else ""
 
-    file_name = create_xlsx(data=xlsx_data, local=False, headers=trails_headers)
+            if clinical_study.get("completion_date"):
 
-    return file_name
+                form_data["End Date"] = clinical_study["completion_date"]["#text"] if type(clinical_study["completion_date"]) == dict else clinical_study["completion_date"]
+            elif clinical_study.get("primary_completion_date"):
+                form_data["End Date"] = clinical_study["primary_completion_date"]["#text"]
+            else:
+                form_data["End Date"] = "N/A"
+            form_data["Conditions"] = " | ".join(clinical_study["condition"]) if type(clinical_study["condition"]) == list else clinical_study["condition"]
+            if clinical_study.get("intervention"):
+                form_data["Interventions"] = get_interventions(clinical_study["intervention"])
+            else:
+                form_data["Interventions"] = ""
+            if clinical_study.get("overall_official"):
+                form_data["Role"] =  get_role(clinical_study["overall_official"])
+            else:
+                form_data["Role"] = ""
+            form_data["Associate Type"] = "N/A"
+            if clinical_study.get("location"):
+                form_data['Facility'],form_data['Region'] = get_facilities(clinical_study["location"], name,lastname)
+                form_data["Other Associates"] = get_other_associates(clinical_study["location"])
+            else:
+                form_data['Facility'] = ""
+                form_data["Other Associates"] = ""
+                form_data['Region'] = ""
+            form_data["Trial Type"] = clinical_study.get("study_type","")
+            form_data["Organizations"] = clinical_study["source"]
+            form_data["Lead Sponsor(s)"] = get_sponsers(clinical_study["sponsors"])
+            xlsx_data.append(form_data)
+        
+        if not xlsx_data:
+            raise Exception("Error occured while comunicating with clinical Trials")
+        if local:
+            return xlsx_data
+
+        file_name = create_xlsx(data=xlsx_data, local=False, headers=trails_headers)
+
+        return file_name
+
+    except Exception as ex:
+        print("clinical_trails exception occurred:{}".format(ex))
+        if local:
+            if xlsx_data:
+                return xlsx_data
+        raise Exception(str(ex))
         
 @route("/clear_tmp",method="POST")
 def clear_tmp():
