@@ -19,7 +19,8 @@ if not os.path.exists(temp_path):
     os.makedirs(temp_path)
 
 
-SHEET_LIMIT = 10000
+SHEET_LIMIT = 50000
+MAX_SHEETS_PER_XLS = 7
 MY_API_KEY = "6f63b0b5ec41afd50bed862a0d61ff0ae709"
 PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
@@ -30,20 +31,30 @@ pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_P
           "Description","Details","ShortDetails", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text"]
 
 trails_headers = ['GM Universal Code', 'Full Name', 'NCT ID', 'URL', 'Verification Status', 'Query Used', 'Trial Name', "Trial Type",'Trial Phase' , 'Overall Status',
- 'Start Date', 'End Date', 'Conditions', 'Interventions', 'Role', 'Facility', 'Region', 'Other Associates', 'Organizations', 'Lead Sponsor(s)']
+ 'Start Date', 'End Date', 'Conditions', 'Interventions', 'Matched Associate','Role', 'Facility', 'Region', 'Other Associates', 'Organizations', 'Lead Sponsor(s)']
 
+
+def zipper(zip_file_name, files):
+    zip_file_name = '{}{}{}.zip'.format(temp_path, os.path.sep, zip_file_name)
+    print("Zipping {} xlsx files to {}".format(len(files), zip_file_name))
+    with zipfile.ZipFile(zip_file_name,'w') as zip_:
+        for file_ in files:
+            zip_.write(temp_path + os.path.sep + file_)
+    return zip_file_name
+        
 
 def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers,sheet_limit=SHEET_LIMIT):
-    file_name = str(uuid.uuid4())+".xlsx"
+    main_file_name = str(uuid.uuid4())+".xlsx"
     sheet_number = 1
-    workbook = xlsxwriter.Workbook(temp_path + os.path.sep + file_name)
+    workbook = xlsxwriter.Workbook(temp_path + os.path.sep + main_file_name)
     worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
     row = 0
     col = 0
+    total_files = [main_file_name]
     for header in headers:
         worksheet.write(row, col, header)
         col += 1
-    
+
     if not local:
         for col_data in data:
             row += 1
@@ -53,14 +64,29 @@ def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers,shee
                 worksheet.write(row, col, col_data[header])
                 col += 1
 
-            if row >= sheet_limit:
+            if sheet_number < MAX_SHEETS_PER_XLS:
+                if row >= sheet_limit:
+                    row = 0
+                    col = 0
+                    sheet_number += 1
+                    worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
+                    for header in headers:
+                        worksheet.write(row, col, header)
+                        col += 1
+            else:
+                if row < sheet_limit:
+                    continue
+                workbook.close() 
+                file_name = "{}_part-{}.xlsx".format(os.path.splitext(main_file_name)[0], len(total_files))
+                sheet_number = 1
+                workbook = xlsxwriter.Workbook(temp_path + os.path.sep + file_name)
+                worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
                 row = 0
                 col = 0
-                sheet_number += 1
-                worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
                 for header in headers:
                     worksheet.write(row, col, header)
                     col += 1
+                total_files.append(file_name)
                 
     else:
         for data in data_list:
@@ -71,18 +97,37 @@ def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers,shee
                     #print("header--> {}:data-->{}:type--->{}".format(header,col_data[header],type(col_data[header])))
                     worksheet.write(row, col, col_data[header])
                     col += 1
-                if row >= sheet_limit:
+
+                if sheet_number < MAX_SHEETS_PER_XLS:
+                    if row >= sheet_limit:
+                        row = 0
+                        col = 0
+                        sheet_number += 1
+                        worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
+                        for header in headers:
+                            worksheet.write(row, col, header)
+                            col += 1
+                else:
+                    if row < sheet_limit:
+                        continue
+                    workbook.close() 
+                    file_name = "{}_part-{}.xlsx".format(os.path.splitext(main_file_name)[0], len(total_files))
+                    sheet_number = 1
+                    workbook = xlsxwriter.Workbook(temp_path + os.path.sep + file_name)
+                    worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
                     row = 0
                     col = 0
-                    sheet_number += 1
-                    worksheet = workbook.add_worksheet(name="Sheet{}".format(sheet_number))
                     for header in headers:
                         worksheet.write(row, col, header)
                         col += 1
-                    
+                    total_files.append(file_name)  
 
-    workbook.close()        
-    return file_name
+    workbook.close()      
+
+    if len(total_files) == 1:
+        return main_file_name
+    else:
+        return zipper(os.path.splitext(main_file_name)[0], total_files)
 
 def xml_to_json(xml):
     ''' This API converts xml data to json
@@ -599,6 +644,40 @@ def get_start_date(date_):
     else:
         return date_
 
+def get_matched_associate(overall_official_list, name, lastname):
+    if type(overall_official_list) == dict:
+        overall_official_list = [overall_official_list]
+    search_name_list = []
+    if lastname:
+        lastname = lastname.lower()
+        lastname = lastname.replace(","," ")
+        lastname_list = lastname.split(" ")
+        try:
+            lastname_list.remove(" ")
+        except:
+            pass
+        search_name_list = lastname_list
+    else:
+        name = name.lower()
+        name = name.replace(","," ")
+        name_list = name.split(" ")
+        try:
+            name_list.remove(" ")
+        except:
+            pass
+        search_name_list = name_list
+
+    for official in overall_official_list:
+        if official.get("last_name"):
+            official_last_name = official["last_name"].lower()
+            official_last_name = official_last_name.replace(","," ")
+            official_last_name_list = official_last_name.split(" ")
+            for name in official_last_name_list:
+                if name in search_name_list:
+                    return official["last_name"]
+    return ""
+
+
 def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, local=False,sheet_limit=SHEET_LIMIT):
     print("name:{},lastname:{}".format(name,lastname))
     try:
@@ -684,6 +763,7 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
                 form_data["Other Associates"] = ""
                 form_data['Region'] = ""
             form_data["Trial Type"] = clinical_study.get("study_type","")
+            form_data["Matched Associate"] = get_matched_associate(clinical_study.get("overall_official",[]), name, lastname)
             form_data["Organizations"] = clinical_study["source"]
             form_data["Lead Sponsor(s)"] = get_sponsers(clinical_study["sponsors"])
             xlsx_data.append(form_data)
