@@ -40,7 +40,8 @@ def zipper(zip_file_name, files):
     with zipfile.ZipFile(zip_file_name,'w') as zip_:
         for file_ in files:
             zip_.write(temp_path + os.path.sep + file_)
-    return zip_file_name
+    print("file:{}".format(zip_file_name))
+    return os.path.basename(zip_file_name)
         
 
 def create_xlsx(data=None, data_list=[], local=False,headers=pubmed_headers,sheet_limit=SHEET_LIMIT):
