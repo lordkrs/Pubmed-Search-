@@ -280,10 +280,14 @@ def get_author_position(name, first_name, last_name, auther_list):
             if author_index != len(auther_list) and author_pos:
                 author_pos += " | "
                 matched_authers += " | "
+            elif author_index == len(auther_list):
+                if not author_pos.endswith(" | "):
+                    author_pos += " | "
+                    matched_authers += " | "
 
-            author_pos += "{}".format(auther_list.index(author)+1)
+            author_pos += "{} ".format(auther_list.index(author)+1)
             try:
-                matched_authers += "{}, {}".format(author.get("LastName", ""), author.get("ForeName", ""))
+                matched_authers += "{}, {} ".format(author.get("LastName", ""), author.get("ForeName", ""))
             except KeyError:
                 if author.get("CollectiveName",None):
                     matched_authers += "{}".format(author["CollectiveName"])
