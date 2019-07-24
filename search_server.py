@@ -211,7 +211,8 @@ def get_details(journal, elocationid):
     return data
 
 def get_short_details(journal):
-    data = "{}. {}".format(journal.get("ISOAbbreviation", ""), journal["JournalIssue"]["PubDate"].get("Year",""))
+    data = "{}.".format(journal.get("ISOAbbreviation", ""))
+    # data = "{}. {}".format(journal.get("ISOAbbreviation", ""), journal["JournalIssue"]["PubDate"].get("Year",""))
     return data
 
 def get_create_date(pub_dates):
@@ -255,24 +256,46 @@ def get_full_name(name, auther_list):
             return author.get("LastName", "") + ", " + author.get("ForeName","")
     return name
 
-def get_author_position(name, auther_list):
+def get_author_position(name, first_name, last_name, auther_list):    
     if type(auther_list) == dict:
         auther_list = [auther_list]
     name_list = name.replace(",","").lower().split(" ")
+    for name_ in name_list:
+        if len(name_) < 2:
+            name_list.remove(name_)
+    if first_name is not None:
+        name_list.append(first_name.lower())
+    if last_name is not None:
+        name_list.append(last_name.lower())
+    author_pos = ""
+    matched_authers = ""
     for author in auther_list:
         if author.get("LastName", "") is None:
             author["LastName"] = ""
         if author.get("ForeName", "") is None:
             author["ForeName"] = ""
-        if author.get("LastName", ""):
-            if author.get("LastName", "").lower() in name_list:
-                if author.get("ForeName", ""):
-                    forename = author.get("ForeName", "").split(" ")[0]
-                    if forename.lower() in name_list:
-                        return auther_list.index(author) + 1
-                else:
-                    return auther_list.index(author) + 1
-    return 0
+        if author.get("LastName", "").lower() in name_list or author.get("ForeName", "").lower() in name_list or author.get("CollectiveName","").lower() in name_list:
+            author_index = auther_list.index(author)+1
+            if author_index != len(auther_list) and author_pos:
+                author_pos += " | "
+                matched_authers += " | "
+
+            author_pos += "{}".format(auther_list.index(author)+1)
+            try:
+                matched_authers += "{}, {}".format(author.get("LastName", ""), author.get("ForeName", ""))
+            except KeyError:
+                if author.get("CollectiveName",None):
+                    matched_authers += "{}".format(author["CollectiveName"])
+            
+        # if author.get("LastName", ""):
+        #     if author.get("LastName", "").lower() in name_list:
+        #         if author.get("ForeName", ""):
+        #             forename = author.get("ForeName", "").split(" ")[0]
+        #             if forename.lower() in name_list:
+        #                 return auther_list.index(author) + 1
+        #         else:
+        #             return auther_list.index(author) + 1
+    return author_pos, matched_authers
 
 
 def get_publication_type(publication_type_list):
@@ -450,7 +473,7 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
 
         return_data = {"ids_info":{}}
         for _id in id_list:
-            return_data["ids_info"][_id] = {"name": name,"query":query_url,"univeral_id":universal_id}
+            return_data["ids_info"][_id] = {"name": name,"lastname":lastname, "firstname":firstname,"query":query_url,"univeral_id":universal_id}
 
         return_data["count"] = len(return_data["ids_info"].keys())
 
@@ -490,6 +513,10 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
         r = requests.post(url=url, data="id={}".format(ids),headers= {"accept": "application/xml"})
         if r.status_code == 200:
             json_data = json.loads(xml_to_json(r.text))
+            if json_data["PubmedArticleSet"].get("PubmedArticle", None) is None:
+                if local:
+                    return xlsx_data
+                raise Exception("No data found")
             if type(json_data["PubmedArticleSet"]["PubmedArticle"]) == dict:
                 json_data["PubmedArticleSet"]["PubmedArticle"] = [json_data["PubmedArticleSet"]["PubmedArticle"]]
             
@@ -501,6 +528,10 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 mesh_heading_data = medline_data.get("MeshHeadingList",{})
                 form_data = {}
                 print("Name---->{}, data found-->({}/{})".format( query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], data_count,len(query_data["ids_info"].keys())))
+                full_name = query_data["ids_info"][medline_data["PMID"]["#text"]]["name"]
+                first_name = query_data["ids_info"][medline_data["PMID"]["#text"]]["firstname"]
+                last_name = query_data["ids_info"][medline_data["PMID"]["#text"]]["lastname"]
+                
                 data_count += 1
                 if type(article_data["ArticleTitle"]) == dict:
                     form_data["Title"] = article_data["ArticleTitle"]["#text"]
@@ -533,7 +564,7 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 else:
                     form_data["Mesh_Headings"] = ""
                 
-                form_data["Authorship_Position"] = get_author_position(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
+                form_data["Authorship_Position"],form_data["Author Match"]  = get_author_position(full_name, first_name, last_name, article_data["AuthorList"]["Author"])
                 form_data["Author_Count"] = len(article_data["AuthorList"]["Author"])
                 form_data["Abstract_Text"] = ""
                 if article_data.get("Abstract",None):
@@ -553,7 +584,7 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                             form_data["Abstract_Text"] = article_data["Abstract"]["AbstractText"]
 
                 form_data["EntrezUID"] = medline_data["PMID"]["#text"]
-                form_data["Author Match"] = get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
+                # form_data["Author Match"] = get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
                 form_data["Properties"] = get_properties(publication_date["History"]["PubMedPubDate"], article_data["AuthorList"]["Author"])
                 xlsx_data.append(form_data)
         else:
@@ -745,7 +776,12 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
                 form_data["End Date"] = clinical_study["primary_completion_date"]["#text"]
             else:
                 form_data["End Date"] = "N/A"
-            form_data["Conditions"] = " | ".join(clinical_study["condition"]) if type(clinical_study["condition"]) == list else clinical_study["condition"]
+            
+            if clinical_study.get("condition"):
+                form_data["Conditions"] = " | ".join(clinical_study["condition"]) if type(clinical_study["condition"]) == list else clinical_study["condition"]
+            else:
+                form_data["Conditions"] = ""
+
             if clinical_study.get("intervention"):
                 form_data["Interventions"] = get_interventions(clinical_study["intervention"])
             else:
