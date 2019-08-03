@@ -770,7 +770,7 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
 
                 form_data["End Date"] = clinical_study["completion_date"]["#text"] if type(clinical_study["completion_date"]) == dict else clinical_study["completion_date"]
             elif clinical_study.get("primary_completion_date"):
-                form_data["End Date"] = clinical_study["primary_completion_date"]["#text"]
+                form_data["End Date"] = clinical_study["primary_completion_date"]["#text"] if type(clinical_study["primary_completion_date"]) == dict else clinical_study["primary_completion_date"]
             else:
                 form_data["End Date"] = "N/A"
             
