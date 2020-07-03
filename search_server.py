@@ -268,29 +268,21 @@ def get_author_position(name, first_name, last_name, auther_list):
         name_list.append(first_name.lower())
     if last_name is not None:
         name_list.append(last_name.lower())
-    author_pos = ""
-    matched_authers = ""
+    author_pos_list = []
+    matched_authers_list = []
     for author in auther_list:
         if author.get("LastName", "") is None:
             author["LastName"] = ""
         if author.get("ForeName", "") is None:
             author["ForeName"] = ""
         if author.get("LastName", "").lower() in name_list or author.get("ForeName", "").lower() in name_list or author.get("CollectiveName","").lower() in name_list:
-            author_index = auther_list.index(author)+1
-            if author_index != len(auther_list) and author_pos:
-                author_pos += " | "
-                matched_authers += " | "
-            elif author_index == len(auther_list):
-                if not author_pos.endswith(" | "):
-                    author_pos += " | "
-                    matched_authers += " | "
 
-            author_pos += "{} ".format(auther_list.index(author)+1)
+            author_pos_list.append("{}".format(auther_list.index(author)+1))
             try:
-                matched_authers += "{}, {} ".format(author.get("LastName", ""), author.get("ForeName", ""))
+                matched_authers_list.append("{}, {}".format(author.get("LastName", ""), author.get("ForeName", "")))
             except KeyError:
                 if author.get("CollectiveName",None):
-                    matched_authers += "{}".format(author["CollectiveName"])
+                    matched_authers_list.append("{}".format(author["CollectiveName"]))
             
         # if author.get("LastName", ""):
         #     if author.get("LastName", "").lower() in name_list:
@@ -300,7 +292,7 @@ def get_author_position(name, first_name, last_name, auther_list):
         #                 return auther_list.index(author) + 1
         #         else:
         #             return auther_list.index(author) + 1
-    return author_pos, matched_authers
+    return " | ".join(author_pos_list), " | ".join(matched_authers_list)
 
 
 def get_publication_type(publication_type_list):
@@ -778,7 +770,7 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
 
                 form_data["End Date"] = clinical_study["completion_date"]["#text"] if type(clinical_study["completion_date"]) == dict else clinical_study["completion_date"]
             elif clinical_study.get("primary_completion_date"):
-                form_data["End Date"] = clinical_study["primary_completion_date"]["#text"]
+                form_data["End Date"] = clinical_study["primary_completion_date"]["#text"] if type(clinical_study["primary_completion_date"]) == dict else clinical_study["primary_completion_date"]
             else:
                 form_data["End Date"] = "N/A"
             
