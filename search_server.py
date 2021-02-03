@@ -21,11 +21,11 @@ if not os.path.exists(temp_path):
 
 SHEET_LIMIT = 50000
 MAX_SHEETS_PER_XLS = 7
-MY_API_KEY = "6f63b0b5ec41afd50bed862a0d61ff0ae709"
-PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709&term={}"
+MY_API_KEY = "ed2157a5df37fbaca4108b27f3765d48bb08"
+PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=ed2157a5df37fbaca4108b27f3765d48bb08&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
-#PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
-PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
+#PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=ed2157a5df37fbaca4108b27f3765d48bb08"
+PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=fasta&retmode=xml&api_key=ed2157a5df37fbaca4108b27f3765d48bb08"
 #Date_format:YYYY/MM/DD
 pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Title","URL", "Query Used",
           "Description","Details","ShortDetails", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text"]
@@ -516,7 +516,8 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 raise Exception("No data found")
             if type(json_data["PubmedArticleSet"]["PubmedArticle"]) == dict:
                 json_data["PubmedArticleSet"]["PubmedArticle"] = [json_data["PubmedArticleSet"]["PubmedArticle"]]
-            
+
+        
             data_count = 1
             for data in json_data["PubmedArticleSet"]["PubmedArticle"]:
                 medline_data = data["MedlineCitation"]
