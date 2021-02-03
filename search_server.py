@@ -29,7 +29,7 @@ PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcg
 #Date_format:YYYY/MM/DD
 pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Keyword","Title", "Journal", "ISSN", "ISSNType",
           "DateRevised_Year","DateRevised_Month","DateRevised_Day","Volume","Issue", "Publications_Date","PubDate_Year","PubDate_Month","PubDate_Day","URL", "Query Used",
-          "Description","Details","ISOAbbreviation", "Pagination", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text"]
+          "Description","Details","ISOAbbreviation", "Pagination","Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text", "Substances"]
 
 trails_headers = ['GM Universal Code', 'Full Name', 'NCT ID', 'URL', 'Verification Status', 'Query Used', 'Trial Name', "Trial Type",'Trial Phase' , 'Overall Status',
  'Start Date', 'End Date', 'Conditions', 'Interventions', 'Matched Associate','Role', 'Facility', 'Region', 'Other Associates', 'Organizations', 'Lead Sponsor(s)']
@@ -315,10 +315,22 @@ def get_publication_type(publication_type_list):
 def getKeyword(keywords):
     data = []
     if type(keywords) == dict:
-        mesh_heading_list = [keywords]
+        keywords = [keywords]
     for keyword in keywords:
         if keyword.get("#text",None) is not None:
             data.append(keyword["#text"])
+    return " | ".join(data)
+
+def getSubstances(chemicals):
+    try:
+        data = []
+        if type(chemicals) == dict:
+            chemicals = [chemicals]
+        for chemical in chemicals:
+            if chemical.get("NameOfSubstance", {}):
+                data.append(chemical["NameOfSubstance"]["#text"])
+    except:
+        pass
     return " | ".join(data)
 
 def get_mesh_headings(mesh_heading_list):
@@ -535,6 +547,9 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
             if type(json_data["PubmedArticleSet"]["PubmedArticle"]) == dict:
                 json_data["PubmedArticleSet"]["PubmedArticle"] = [json_data["PubmedArticleSet"]["PubmedArticle"]]
             
+            with open('{}.json'.format(str(uuid.uuid4())),"w") as f:
+                f.write(json.dumps(json_data))
+
             data_count = 1
             for data in json_data["PubmedArticleSet"]["PubmedArticle"]:
                 medline_data = data["MedlineCitation"]
@@ -569,6 +584,8 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 pagination_data = article_data.get("Pagination",{})
                 form_data["Pagination"] = pagination_data.get("MedlinePgn",'')
                 date_revised = medline_data["DateRevised"]
+                chemical_list = medline_data.get("ChemicalList",{})
+                form_data["Substances"] = getSubstances(chemical_list.get("Chemical",[]))
                 keyword_list = medline_data.get("KeywordList",{})
                 form_data["Keyword"] = getKeyword(keyword_list.get("Keyword",[]))
                 form_data["DateRevised_Year"] = date_revised.get("Year",'')
