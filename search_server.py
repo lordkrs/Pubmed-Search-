@@ -21,14 +21,15 @@ if not os.path.exists(temp_path):
 
 SHEET_LIMIT = 50000
 MAX_SHEETS_PER_XLS = 7
-MY_API_KEY = "6f63b0b5ec41afd50bed862a0d61ff0ae709"
-PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709&term={}"
+MY_API_KEY = "ed2157a5df37fbaca4108b27f3765d48bb08"
+PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=ed2157a5df37fbaca4108b27f3765d48bb08&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
-#PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
-PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=fasta&retmode=xml&api_key=6f63b0b5ec41afd50bed862a0d61ff0ae709"
+#PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=ed2157a5df37fbaca4108b27f3765d48bb08"
+PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=fasta&retmode=xml&api_key=ed2157a5df37fbaca4108b27f3765d48bb08"
 #Date_format:YYYY/MM/DD
-pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Title","URL", "Query Used",
-          "Description","Details","ShortDetails", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text"]
+pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Keyword","Title", "Journal", "ISSN", "ISSNType",
+          "DateRevised_Year","DateRevised_Month","DateRevised_Day","Volume","Issue", "Publications_Date","PubDate_Year","PubDate_Month","PubDate_Day","URL", "Query Used",
+          "Description","Details","ISOAbbreviation", "Pagination", "Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text"]
 
 trails_headers = ['GM Universal Code', 'Full Name', 'NCT ID', 'URL', 'Verification Status', 'Query Used', 'Trial Name', "Trial Type",'Trial Phase' , 'Overall Status',
  'Start Date', 'End Date', 'Conditions', 'Interventions', 'Matched Associate','Role', 'Facility', 'Region', 'Other Associates', 'Organizations', 'Lead Sponsor(s)']
@@ -221,8 +222,16 @@ def get_create_date(pub_dates):
         pub_dates = [pub_dates]
     for date in pub_dates:
         if date["@PubStatus"] in ["pubmed", "medline"]:
-            data = "{}/{}/{}".format(date.get("Year",""), date["Month"], date["Day"])
+            data = "{}-{}-{}".format(date.get("Year",""), date["Month"], date["Day"])
             return data
+    return ""
+
+def get_pubdate_info(pub_dates, key):
+    if type(pub_dates) == dict:
+        pub_dates = [pub_dates]
+    for date in pub_dates:
+        if date["@PubStatus"] in ["pubmed", "medline"]:
+            return date.get(key,"")
     return ""
     
 def get_first_author(auther_list):
@@ -301,7 +310,16 @@ def get_publication_type(publication_type_list):
         publication_type_list = [publication_type_list]
     for type_ in publication_type_list:
         data.append(type_["#text"])
-    return ";".join(data)
+    return " | ".join(data)
+
+def getKeyword(keywords):
+    data = []
+    if type(keywords) == dict:
+        mesh_heading_list = [keywords]
+    for keyword in keywords:
+        if keyword.get("#text",None) is not None:
+            data.append(keyword["#text"])
+    return " | ".join(data)
 
 def get_mesh_headings(mesh_heading_list):
     data = []
@@ -310,7 +328,7 @@ def get_mesh_headings(mesh_heading_list):
     for heading in mesh_heading_list:
         if heading.get("DescriptorName",""):
             data.append(heading["DescriptorName"].get("#text",""))
-    return ";".join(data)
+    return " | ".join(data)
 
 
 def get_properties(pub_dates,auther_list):
@@ -545,9 +563,23 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 form_data["GM Universal Code"] = query_data["ids_info"][medline_data["PMID"]["#text"]]["univeral_id"]
                 form_data["Affiliation"] = get_affiliation_details(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
                 form_data["Query Used"] = query_data["ids_info"][medline_data["PMID"]["#text"]]["query"]
-                form_data["ShortDetails"] = get_short_details(article_data["Journal"])
+                form_data["ISOAbbreviation"] = get_short_details(article_data["Journal"])
                 form_data["Resource"] = "PubMed"
                 form_data["Type"] = "citation"
+                pagination_data = article_data.get("Pagination",{})
+                form_data["Pagination"] = pagination_data.get("MedlinePgn",'')
+                date_revised = medline_data["DateRevised"]
+                keyword_list = medline_data.get("KeywordList",{})
+                form_data["Keyword"] = getKeyword(keyword_list.get("Keyword",[]))
+                form_data["DateRevised_Year"] = date_revised.get("Year",'')
+                form_data["DateRevised_Month"] = date_revised.get("Month",'')
+                form_data["DateRevised_Day"] = date_revised.get("Day",'')
+                form_data["Volume"] = article_data["Journal"]["JournalIssue"].get("Volume",0)
+                form_data["Issue"] = article_data["Journal"]["JournalIssue"].get("Issue",0)
+                form_data["Journal"] = article_data["Journal"].get("Title","")
+                issn_info = article_data["Journal"].get("ISSN",{})
+                form_data["ISSN"] = issn_info.get("#text")
+                form_data["ISSNType"] = issn_info.get("@IssnType")
                 form_data["Full Name"] =   query_data["ids_info"][medline_data["PMID"]["#text"]]["name"]    #get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
                 form_data["Identifiers"] = "PMID:" + medline_data["PMID"]["#text"]
                 form_data["Db"] = "pubmed"
@@ -583,6 +615,10 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 form_data["EntrezUID"] = medline_data["PMID"]["#text"]
                 # form_data["Author Match"] = get_full_name(query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], article_data["AuthorList"]["Author"])
                 form_data["Properties"] = get_properties(publication_date["History"]["PubMedPubDate"], article_data["AuthorList"]["Author"])
+                form_data["Publications_Date"] = get_create_date(publication_date["History"]["PubMedPubDate"])
+                form_data["PubDate_Day"] = get_pubdate_info(publication_date["History"]["PubMedPubDate"], "Day")
+                form_data["PubDate_Month"] = get_pubdate_info(publication_date["History"]["PubMedPubDate"], "Month")
+                form_data["PubDate_Year"] = get_pubdate_info(publication_date["History"]["PubMedPubDate"], "Year")
                 xlsx_data.append(form_data)
         else:
             raise Exception("Error occured while comunicating with pubmed, status_code({}),text({})".format(r.status_code,r.text))
