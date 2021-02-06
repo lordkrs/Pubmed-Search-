@@ -423,12 +423,13 @@ def do_upload():
 
 
 @route("/search", method='POST')
-def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="400", local_searh=False,sheet_len=SHEET_LIMIT):
+def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="400", local_searh=False,sheet_len=SHEET_LIMIT, pubmed_id=None):
     try:
         if not local_searh:
             name = request.forms.get('Name')  if request.forms.get('Name') else None
             records_per_page = request.forms.get('records') if request.forms.get('records') else "420"
             universal_id = request.forms.get('Uid') if request.forms.get('Uid') else str(uuid.uuid4())
+            pubmed_id = request.forms.get('pubmed_id') if request.forms.get('pubmed_id') else None
             from_date = request.forms.get('from_date')  if request.forms.get('from_date') else None
             to_date = request.forms.get('to_date')  if request.forms.get('to_date') else None
             initial = request.forms.get('Initial')  if request.forms.get('Initial') else None
@@ -445,6 +446,14 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
                 if file_ is not None:
                     return static_file(file_, temp_path, download=file_)
                 return "No Data found"
+        
+        if search_type == "Pubmed" and pubmed_id is not None:
+            file_ = download_pubmed_info_by_id(pubmed_id, sheet_len)
+            if local_searh:
+                return file_
+            else:
+                if file_ is not None:
+                    return static_file(file_, temp_path, download=file_)
 
         url = None
         if not name:
@@ -869,7 +878,73 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
             if xlsx_data:
                 return xlsx_data
         raise Exception(str(ex))
-        
+
+def getAffiliationInfo(AffiliationInfo):
+    if type(AffiliationInfo) == dict:
+        AffiliationInfo = [AffiliationInfo]
+    
+    data = []
+    for aInfo in AffiliationInfo:
+        data.append(aInfo["Affiliation"].replace(","," | "))
+    return "^".join(data)
+
+def download_pubmed_info_by_id(id=None, sheet_limit=SHEET_LIMIT):
+    if id is None:
+        return {}
+    
+    headers = []
+    headers.extend(pubmed_headers)
+    uid = request.query.uid if request.query.uid else str(uuid.uuid4())
+
+    try:
+        url = PUBMED_DOWNLOAD_CSV
+        print("pubmed download_pubmed_info_by_id url: {}".format(url))
+        r = requests.post(url=url, data="id={}".format(id),headers= {"accept": "application/xml"})
+        if r.status_code == 200:
+            json_data = json.loads(xml_to_json(r.text))
+            if json_data["PubmedArticleSet"].get("PubmedArticle", None) is None:
+                raise Exception("No data found")
+
+            if type(json_data["PubmedArticleSet"]["PubmedArticle"]) == dict:
+                json_data["PubmedArticleSet"]["PubmedArticle"] = [json_data["PubmedArticleSet"]["PubmedArticle"]]
+            
+            data = {}
+            data.update(json_data["PubmedArticleSet"]["PubmedArticle"][0])
+            
+            medline_data = data["MedlineCitation"]
+            article_data = medline_data["Article"]
+            publication_date = data["PubmedData"]
+            mesh_heading_data = medline_data.get("MeshHeadingList",{})
+            
+            
+            print(article_data)
+            
+            author_list = article_data["AuthorList"].get("Author",[])
+            if type(author_list) == dict:
+                author_list = [author_list]
+            
+            xlsx_data = []
+            index = 0
+            for author in author_list:
+                index += 1
+                form_data = {}
+                form_data["PMID"] = id
+                form_data["LastName"] = author.get("LastName","")
+                form_data["ForeName"] = author.get("ForeName","")
+                form_data["Affiliation"] = getAffiliationInfo(author.get("AffiliationInfo",[]))
+                form_data["Author Sequence"] = index
+                xlsx_data.append(form_data)
+            
+            file_name = create_xlsx(data=xlsx_data, headers=xlsx_data[0].keys(),local=False, sheet_limit=sheet_limit)
+            return file_name
+
+    
+    except Exception as ex:
+        print("get_pubmed_info_by_id:Exception occurred: {}".format(ex)) 
+    
+
+
+
 @route("/clear_tmp",method="POST")
 def clear_tmp():
     files = os.listdir(temp_path)
