@@ -34,6 +34,7 @@ pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_P
 trails_headers = ['GM Universal Code', 'Full Name', 'NCT ID', 'URL', 'Verification Status', 'Query Used', 'Trial Name', "Trial Type",'Trial Phase' , 'Overall Status',
  'Start Date', 'End Date', 'Conditions', 'Interventions', 'Matched Associate','Role', 'Facility', 'Region', 'Other Associates', 'Organizations', 'Lead Sponsor(s)']
 
+PMID_HEADERS = ["PMID", "LastName","ForeName","Affiliation","Author Sequence"]
 
 def zipper(zip_file_name, files):
     zip_file_name = '{}{}{}.zip'.format(temp_path, os.path.sep, zip_file_name)
@@ -366,11 +367,15 @@ def do_upload():
     header_ = pubmed_headers
     if search_type == "Clinical Trails":
         header_ = trails_headers
+    elif search_type == "Pubmed Id Search":
+        header_ = PMID_HEADERS
+    
     if from_date and to_date:
         if datetime.datetime.strptime(from_date, "%Y-%m-%d") > datetime.datetime.strptime(to_date, "%Y-%m-%d"):
             return '<html><script>alert("from date should be lesser than to date");</script><html>'
 
-    try:
+    #try:
+    if True:
         xlsx_file_path = os.path.join(temp_path, upload.filename)
         xlsx_data = []
         wb_obj = openpyxl.load_workbook(xlsx_file_path)
@@ -385,7 +390,7 @@ def do_upload():
         ids_return_data = {"ids_info":{},"count":0}
 
         xlsx_data_list = []
-
+        
         for column_data in xlsx_data:
             print("\n\n{} of {}\n\n".format(xlsx_data.index(column_data)+1, len(xlsx_data)))
             name = column_data["Full_Name"] if column_data.get("Full_Name") else None
@@ -393,9 +398,10 @@ def do_upload():
             firstname = column_data["First_Name"] if column_data.get("First_Name") else None
             initial = column_data["Middle_Name"] if column_data.get("Middle_Name") else None
             lastname = column_data["Last_Name"] if column_data.get("Last_Name") else None
-            if name is not None:
+            pubmed_id = str(column_data["PMID"]) if column_data.get("PMID",None) is not None else None
+            if name is not None or pubmed_id is not None:
                 try:
-                    search_data = search_citations(name=name, search_type=search_type,sheet_len=sheet_len,initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000)
+                    search_data = search_citations(name=name, search_type=search_type,sheet_len=sheet_len,initial=initial, lastname=lastname, firstname=firstname, universal_id=uid, local_searh=True, from_date=from_date, to_date=to_date, records_per_page=4000,pubmed_id=pubmed_id)
                 except Exception as ex:
                     if xlsx_data_list:
                         break
@@ -407,17 +413,22 @@ def do_upload():
                     xlsx_data_list.append(search_data)
                     ids_return_data = {"ids_info":{},"count":1}
                     continue
+                
+                if search_type == "Pubmed Id Search":
+                    xlsx_data_list.append(search_data)
+                    ids_return_data = {"ids_info":{},"count":len(xlsx_data_list)}
 
-                if search_data["count"] != 0:
+                elif search_data["count"] != 0 and search_type != "Pubmed Id Search":
                     ids_return_data["ids_info"].update(search_data["ids_info"])                
                     ids_return_data["count"] += len(search_data["ids_info"].keys())
                     xlsx_data_list.append(download_csv(search_data, local=True))
-
+            
         if ids_return_data["count"] != 0:
             
             file_path = create_xlsx(data_list=xlsx_data_list, local=True, headers=header_, sheet_limit=sheet_len)
             return static_file(file_path, temp_path, download=file_path)
-    except Exception as ex:
+    #except Exception as ex:
+    else:
         print("Exception in upload:{}".format(ex))
         abort(500, "Exception occurred: {}".format(ex))        
 
@@ -447,8 +458,8 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
                     return static_file(file_, temp_path, download=file_)
                 return "No Data found"
         
-        if search_type == "Pubmed" and pubmed_id is not None:
-            file_ = download_pubmed_info_by_id(pubmed_id, sheet_len)
+        if search_type == "Pubmed Id Search" and pubmed_id is not None:
+            file_ = download_pubmed_info_by_id(pubmed_id, local_searh,sheet_len)
             if local_searh:
                 return file_
             else:
@@ -556,8 +567,6 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
             if type(json_data["PubmedArticleSet"]["PubmedArticle"]) == dict:
                 json_data["PubmedArticleSet"]["PubmedArticle"] = [json_data["PubmedArticleSet"]["PubmedArticle"]]
             
-            with open('{}.json'.format(str(uuid.uuid4())),"w") as f:
-                f.write(json.dumps(json_data))
 
             data_count = 1
             for data in json_data["PubmedArticleSet"]["PubmedArticle"]:
@@ -888,7 +897,7 @@ def getAffiliationInfo(AffiliationInfo):
         data.append(aInfo["Affiliation"].replace(","," | "))
     return "^".join(data)
 
-def download_pubmed_info_by_id(id=None, sheet_limit=SHEET_LIMIT):
+def download_pubmed_info_by_id(id=None, local=False,sheet_limit=SHEET_LIMIT):
     if id is None:
         return {}
     
@@ -916,9 +925,6 @@ def download_pubmed_info_by_id(id=None, sheet_limit=SHEET_LIMIT):
             publication_date = data["PubmedData"]
             mesh_heading_data = medline_data.get("MeshHeadingList",{})
             
-            
-            print(article_data)
-            
             author_list = article_data["AuthorList"].get("Author",[])
             if type(author_list) == dict:
                 author_list = [author_list]
@@ -935,7 +941,9 @@ def download_pubmed_info_by_id(id=None, sheet_limit=SHEET_LIMIT):
                 form_data["Author Sequence"] = index
                 xlsx_data.append(form_data)
             
-            file_name = create_xlsx(data=xlsx_data, headers=xlsx_data[0].keys(),local=False, sheet_limit=sheet_limit)
+            if local:
+                return xlsx_data
+            file_name = create_xlsx(data=xlsx_data, headers=PMID_HEADERS,local=False, sheet_limit=sheet_limit)
             return file_name
 
     
