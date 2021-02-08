@@ -29,12 +29,13 @@ PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcg
 #Date_format:YYYY/MM/DD
 pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Keyword","Title", "Journal", "ISSN", "ISSNType",
           "DateRevised_Year","DateRevised_Month","DateRevised_Day","Volume","Issue", "Publications_Date","PubDate_Year","PubDate_Month","PubDate_Day","URL", "Query Used",
-          "Description","Details","ISOAbbreviation", "Pagination","Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text", "Substances"]
+          "Description","Collaborators","Details","ISOAbbreviation", "Pagination","Affiliation","Resource","Type","Identifiers","Db","EntrezUID","Properties", "Author_Count", "Abstract_Text", "Substances"]
 
 trails_headers = ['GM Universal Code', 'Full Name', 'NCT ID', 'URL', 'Verification Status', 'Query Used', 'Trial Name', "Trial Type",'Trial Phase' , 'Overall Status',
  'Start Date', 'End Date', 'Conditions', 'Interventions', 'Matched Associate','Role', 'Facility', 'Region', 'Other Associates', 'Organizations', 'Lead Sponsor(s)']
 
 PMID_HEADERS = ["PMID", "LastName","ForeName","Affiliation","Author Sequence"]
+# PMID_HEADERS = ["PMID", "LastName","ForeName","Affiliation","Author Sequence","Collaborators"]
 
 def zipper(zip_file_name, files):
     zip_file_name = '{}{}{}.zip'.format(temp_path, os.path.sep, zip_file_name)
@@ -458,7 +459,7 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
                     return static_file(file_, temp_path, download=file_)
                 return "No Data found"
         
-        if search_type == "Pubmed Id Search" and pubmed_id is not None:
+        if search_type == "Pubmed Id Search" or pubmed_id is not None:
             file_ = download_pubmed_info_by_id(pubmed_id, local_searh,sheet_len)
             if local_searh:
                 return file_
@@ -537,6 +538,11 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
         print("search_citations:Exception occurred: {}".format(ex))
         abort(500, "Exception occurred: {}".format(ex))
 
+def getCollaboratorsList(collaborators_list=[]):
+    data = []
+    for collaborator in collaborators_list:
+        data.append("{} {}".format(collaborator.get("ForeName",""),collaborator.get("LastName","")))
+    return " | ".join(data)
 
 @route("/pubmed/download")
 def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
@@ -574,6 +580,11 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 article_data = medline_data["Article"]
                 publication_date = data["PubmedData"]
                 mesh_heading_data = medline_data.get("MeshHeadingList",{})
+                collaborators = medline_data.get("InvestigatorList",{})
+                collaborators_list = collaborators.get("Investigator",[])
+                if type(collaborators_list) == dict:
+                    collaborators_list = [collaborators_list]
+
                 form_data = {}
                 print("Name---->{}, data found-->({}/{})".format( query_data["ids_info"][medline_data["PMID"]["#text"]]["name"], data_count,len(query_data["ids_info"].keys())))
                 full_name = query_data["ids_info"][medline_data["PMID"]["#text"]]["name"]
@@ -598,6 +609,7 @@ def download_csv(query_data=None, local=False,sheet_limit=SHEET_LIMIT):
                 form_data["Query Used"] = query_data["ids_info"][medline_data["PMID"]["#text"]]["query"]
                 form_data["ISOAbbreviation"] = get_short_details(article_data["Journal"])
                 form_data["Resource"] = "PubMed"
+                form_data["Collaborators"] = getCollaboratorsList(collaborators_list)
                 form_data["Type"] = "citation"
                 pagination_data = article_data.get("Pagination",{})
                 form_data["Pagination"] = pagination_data.get("MedlinePgn",'')
@@ -924,13 +936,18 @@ def download_pubmed_info_by_id(id=None, local=False,sheet_limit=SHEET_LIMIT):
             article_data = medline_data["Article"]
             publication_date = data["PubmedData"]
             mesh_heading_data = medline_data.get("MeshHeadingList",{})
-            
+            collaborators = medline_data.get("InvestigatorList",{})
+            collaborators_list = collaborators.get("Investigator",[])
+            if type(collaborators_list) == dict:
+                collaborators_list = [collaborators_list]
+                
             author_list = article_data["AuthorList"].get("Author",[])
             if type(author_list) == dict:
                 author_list = [author_list]
             
             xlsx_data = []
             index = 0
+            print(author_list)
             for author in author_list:
                 index += 1
                 form_data = {}
@@ -939,6 +956,7 @@ def download_pubmed_info_by_id(id=None, local=False,sheet_limit=SHEET_LIMIT):
                 form_data["ForeName"] = author.get("ForeName","")
                 form_data["Affiliation"] = getAffiliationInfo(author.get("AffiliationInfo",[]))
                 form_data["Author Sequence"] = index
+                # form_data["Collaborators"] = getCollaboratorsList(collaborators_list)
                 xlsx_data.append(form_data)
             
             if local:
