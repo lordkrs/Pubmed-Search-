@@ -9,10 +9,10 @@ from multiprocessing import process
 import openpyxl
 from bottle import abort, request, static_file, run, route
 import sys
-from clinical_trials import Trials
+from ct.clinical_trials import Trials
 import zipfile
-reload(sys)
-sys.setdefaultencoding("utf-8")
+#reload(sys)
+#sys.setdefaultencoding("utf-8")
 
 temp_path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "tmp"
 if not os.path.exists(temp_path):
@@ -21,11 +21,11 @@ if not os.path.exists(temp_path):
 
 SHEET_LIMIT = 50000
 MAX_SHEETS_PER_XLS = 7
-MY_API_KEY = "ed2157a5df37fbaca4108b27f3765d48bb08"
-PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=ed2157a5df37fbaca4108b27f3765d48bb08&term={}"
+MY_API_KEY = "c53040b797efc34aeed6fcf50f8671315208"
+PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&api_key=c53040b797efc34aeed6fcf50f8671315208&term={}"
 PUBMED_DATE_QUERY = '+AND+("{}"[PDat] : "{}"[PDat])'
 #PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=fasta&retmode=xml&api_key=ed2157a5df37fbaca4108b27f3765d48bb08"
-PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=fasta&retmode=xml&api_key=ed2157a5df37fbaca4108b27f3765d48bb08"
+PUBMED_DOWNLOAD_CSV =  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=fasta&retmode=xml&api_key=c53040b797efc34aeed6fcf50f8671315208"
 #Date_format:YYYY/MM/DD
 pubmed_headers = ["GM Universal Code", "Full Name", "Author Match","Authorship_Position", "Publication_Type", "Mesh_Headings","Keyword","Title", "Journal", "ISSN", "ISSNType",
           "DateRevised_Year","DateRevised_Month","DateRevised_Day","Volume","Issue", "Publications_Date","PubDate_Year","PubDate_Month","PubDate_Day","URL", "Query Used",
@@ -436,7 +436,8 @@ def do_upload():
 
 @route("/search", method='POST')
 def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None, firstname=None, universal_id=None,from_date=None, to_date=None,  records_per_page="400", local_searh=False,sheet_len=SHEET_LIMIT, pubmed_id=None):
-    try:
+    # try:
+    if True:
         if not local_searh:
             name = request.forms.get('Name')  if request.forms.get('Name') else None
             records_per_page = request.forms.get('records') if request.forms.get('records') else "420"
@@ -516,7 +517,7 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
 
         id_list = json_data["eSearchResult"]["IdList"].get("Id",None) 
       
-        if type(id_list) in [str, int, unicode]:
+        if type(id_list) in [str, int]:
             id_list = [id_list]
 
         return_data = {"ids_info":{}}
@@ -534,7 +535,8 @@ def search_citations(name=None, search_type="Pubmed",initial=None, lastname=None
             else:
                 return return_data
 
-    except Exception as ex:
+    # except Exception as ex:
+    else:
         print("search_citations:Exception occurred: {}".format(ex))
         abort(500, "Exception occurred: {}".format(ex))
 
@@ -791,7 +793,8 @@ def get_matched_associate(overall_official_list, name, lastname):
 
 def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, local=False,sheet_limit=SHEET_LIMIT):
     print("name:{},lastname:{}".format(name,lastname))
-    try:
+    # try:
+    if True:
         t = Trials()
         zip_folder_path = os.path.join(temp_path,str(uuid.uuid4()))
         if not os.path.exists(zip_folder_path):
@@ -822,7 +825,7 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
         clinical_trails_data = []
         for file_ in files:
             xml_file = os.path.join(zip_folder_path, file_)
-            xml_file_obj = open(xml_file,"r")
+            xml_file_obj = open(xml_file,"r",encoding="utf8")
             xml_data = xml_file_obj.read()
             json_data = json.loads(xml_to_json(xml_data))
             clinical_trails_data.append(json_data)
@@ -893,7 +896,8 @@ def clinical_trails(name, _uuid, lastname=None, initial=None, firstname=None, lo
 
         return file_name
 
-    except Exception as ex:
+    # except Exception as ex:
+    else:
         print("clinical_trails exception occurred:{}".format(ex))
         if local:
             if xlsx_data:
